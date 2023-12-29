@@ -20,8 +20,8 @@
     "rules": {
         "react/react-in-jsx-scope": "off",
         "no-console": "warn",
-        "one-var": "error",
-        "no-unused-vars": "error",
-        "unused-imports/no-unused-imports": "error"
+        "no-unused-vars": "warn",
+        "unused-imports/no-unused-imports": "error",
+        "no-new": "off"
         }
 }

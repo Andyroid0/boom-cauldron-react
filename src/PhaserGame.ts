@@ -2,6 +2,7 @@ import Phaser from "phaser";
 
 import Bootstrap from "./scenes/Bootstrap";
 import Game from "./scenes/Game";
+import DungeonScene from "./scratch/dungeunbuilder";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -19,7 +20,7 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: true,
     },
   },
-  scene: [Bootstrap, Game],
+  scene: [Bootstrap, Game, DungeonScene],
   pixelArt: true,
 };
 // eslint-disable-next-line import/no-anonymous-default-export

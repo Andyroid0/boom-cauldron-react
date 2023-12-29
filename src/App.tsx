@@ -1,9 +1,16 @@
-// import { useState } from "react";
+import { ThemeProvider } from "@emotion/react";
+
+import Router from "./Router";
+import "@fontsource/tajawal";
+import theme from "./context/Theme";
 import "./css/App.css";
-import "./PhaserGame";
 
 const App = () => {
-  return <div id="phaser-container" className="App" />;
+  return (
+    <ThemeProvider theme={theme}>
+      <Router />
+    </ThemeProvider>
+  );
 };
 
 export default App;

@@ -20,6 +20,7 @@ export default class Bootstrap extends Scene {
 
   private createNewGame() {
     // this launches the game scene
-    this.scene.launch("game");
+    this.scene.launch("dungeon");
+    // ("game");
   }
 }
