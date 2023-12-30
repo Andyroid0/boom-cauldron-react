@@ -1,8 +1,9 @@
+/* eslint-disable @shopify/strict-component-boundaries */
 import Phaser from "phaser";
 
 import Bootstrap from "./scenes/Bootstrap";
 import Game from "./scenes/Game";
-import DungeonScene from "./scratch/dungeunbuilder";
+import DungeonScene from "./scenes/Dungeon/DungeonScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,

@@ -1,46 +1,12 @@
 import Dungeon, { Room } from "@mikewesthad/dungeon";
 import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
 import * as dat from "dat.gui";
+import EasyStar from "easystarjs";
 
+import { TILES } from "./tiles.data";
 //  Toggle this to disable the room hiding / layer scale, so you can see the extent of the map easily!
 const debug = false;
-// Tile index mapping to make the code more readable
-const TILES = {
-  TOP_LEFT_WALL: 1,
-  TOP_RIGHT_WALL: 3,
-  BOTTOM_RIGHT_WALL: 27,
-  BOTTOM_LEFT_WALL: 25,
-  TOP_WALL: [
-    { index: 2, weight: 4 },
-    // { index: 57, weight: 1 },
-    // { index: 58, weight: 1 },
-    // { index: 59, weight: 1 },
-  ],
-  LEFT_WALL: [
-    { index: 13, weight: 4 },
-    // { index: 76, weight: 1 },
-    // { index: 95, weight: 1 },
-    // { index: 114, weight: 1 },
-  ],
-  RIGHT_WALL: [
-    { index: 15, weight: 4 },
-    // { index: 77, weight: 1 },
-    // { index: 96, weight: 1 },
-    // { index: 115, weight: 1 },
-  ],
-  BOTTOM_WALL: [
-    { index: 26, weight: 4 },
-    // { index: 78, weight: 1 },
-    // { index: 79, weight: 1 },
-    // { index: 80, weight: 1 },
-  ],
-  FLOOR: [
-    { index: 48, weight: 20 },
-    { index: 49, weight: 1 },
-    // { index: 8, weight: 1 },
-    // { index: 26, weight: 1 },
-  ],
-};
+
 class DungeonScene extends Scene {
   activeRoom: Room | null = null;
   dungeon: Dungeon | null = null;
@@ -50,31 +16,18 @@ class DungeonScene extends Scene {
   cam: Cameras.Scene2D.Camera | null = null;
   layer: Tilemaps.TilemapLayer | null = null;
   lastMoveTime = 0;
+  // eslint-disable-next-line @babel/new-cap
+  easystar: EasyStar.js = new EasyStar.js();
 
   constructor() {
     super("dungeon");
   }
 
   preload() {
-    // Credits! Michele "Buch" Bucelli (tilset artist) & Abram Connelly (tileset sponser)
-    // https://opengameart.org/content/top-down-dungeon-tileset
     this.load.image("tiles", "img/tilemap_packed.png");
   }
 
   create() {
-    // Note: Dungeon is not a Phaser element - it's from the custom script embedded at the bottom :)
-    // It generates a simple set of connected rectangular rooms that then we can turn into a tilemap
-
-    //  2,500 tile test
-    // dungeon = new Dungeon({
-    //     width: 50,
-    //     height: 50,
-    //     rooms: {
-    //         width: { min: 7, max: 15, onlyOdd: true },
-    //         height: { min: 7, max: 15, onlyOdd: true }
-    //     }
-    // });
-
     //  40,000 tile test
     this.dungeon = new Dungeon({
       width: 200,
@@ -84,26 +37,6 @@ class DungeonScene extends Scene {
         height: { min: 7, max: 20, onlyOdd: true },
       },
     });
-
-    //  250,000 tile test!
-    // dungeon = new Dungeon({
-    //     width: 500,
-    //     height: 500,
-    //     rooms: {
-    //         width: { min: 7, max: 20, onlyOdd: true },
-    //         height: { min: 7, max: 20, onlyOdd: true }
-    //     }
-    // });
-
-    //  1,000,000 tile test! - Warning, takes a few seconds to generate the dungeon :)
-    // dungeon = new Dungeon({
-    //     width: 1000,
-    //     height: 1000,
-    //     rooms: {
-    //         width: { min: 7, max: 20, onlyOdd: true },
-    //         height: { min: 7, max: 20, onlyOdd: true }
-    //     }
-    // });
 
     // Creating a blank tilemap with dimensions matching the dungeon
     const tileMapConfig: Types.Tilemaps.TilemapConfig = {
@@ -126,10 +59,12 @@ class DungeonScene extends Scene {
     ) as Tilemaps.Tileset;
 
     this.layer = this.map.createBlankLayer("Layer 1", tileset);
+
     if (!this.layer) {
       console.error("layer is null or undefined.");
       return;
     }
+
     if (!debug) {
       this.layer.setScale(3);
     }
@@ -189,13 +124,14 @@ class DungeonScene extends Scene {
 
       // Place some random stuff in rooms occasionally
       const rand = Math.random();
-      // if (rand <= 0.25) {
-      //   // Chest
-      //   this.layer.putTileAt(166, cx, cy);
-      // } else if (rand <= 0.3) {
-      //   // Stairs
-      //   this.layer.putTileAt(81, cx, cy);
-      // } else if (rand <= 0.4) {
+      if (rand <= 0.25) {
+        // Chest
+        this.layer.putTileAt(89, cx, cy);
+      } else if (rand <= 0.3) {
+        // Stairs
+        this.layer.putTileAt(85, cx, cy);
+      }
+      // else if (rand <= 0.4) {
       //   // Trap door
       //   this.layer.putTileAt(167, cx, cy);
       // }
@@ -217,9 +153,8 @@ class DungeonScene extends Scene {
       // }
     }, this);
 
-    // Not exactly correct for the tileset since there are more possible floor tiles, but this will
-    // do for the example.
-    this.layer.setCollisionByExclusion([0, 48, 49]);
+    const excludeFromCollision = [0, 48, 49];
+    this.layer.setCollisionByExclusion(excludeFromCollision);
 
     // Hide all the rooms
     if (!debug) {
@@ -243,6 +178,37 @@ class DungeonScene extends Scene {
     this.player.x = this.map.tileToWorldX(playerRoom.x + 1) as number;
     this.player.y = this.map.tileToWorldY(playerRoom.y + 1) as number;
 
+    const easyStarGrid = (): number[][] => {
+      const grid: number[][] = [];
+      this.map!.layers[0].data.forEach((row) => {
+        const newRow: number[] = [];
+        row.forEach((tile) => {
+          if (tile.collides) newRow.push(1);
+          else newRow.push(0);
+        });
+        grid.push(newRow);
+      });
+      return grid;
+    };
+
+    this.easystar.setGrid(easyStarGrid());
+    this.easystar.setAcceptableTiles([0]);
+    this.easystar.findPath(
+      this.map.worldToTileX(this.player.x) as number,
+      this.map.worldToTileY(this.player.y) as number,
+      (this.map.worldToTileX(this.player.x)! + 3) as number,
+      (this.map.worldToTileY(this.player.y)! + 3) as number,
+      (path) => {
+        // eslint-disable-next-line no-alert
+        if (path === null) alert("Path was not found.");
+        else {
+          // eslint-disable-next-line no-alert
+          alert(`Path was found. The first Point is ${path[0].x} ${path[0].y}`);
+        }
+      },
+    );
+    this.easystar.calculate();
+
     if (!debug) {
       // Make the starting room visible
       this.setRoomAlpha(playerRoom, 1, this.map);
@@ -264,12 +230,15 @@ class DungeonScene extends Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
     } else console.warn("Keyboard isn't present.");
 
-    const help = this.add.text(16, 16, "Arrows keys to move", {
+    const textStyle: Types.GameObjects.Text.TextStyle = {
       fontSize: "18px",
       padding: { x: 10, y: 5 },
-      backgroundColor: "#ffffff",
-      // fill: "#000000",
-    });
+      color: "#ffffff",
+      backgroundColor: "#000000",
+      fontFamily: "Mana",
+    };
+
+    const help = this.add.text(16, 16, "Arrows keys to move", textStyle);
 
     help.setScrollFactor(0);
 
@@ -323,23 +292,38 @@ class DungeonScene extends Scene {
         };
         this.tweens.add(tweenConfig);
       }
-      // this.easeRoomAlpha(this.activeRoom, 0.1, this.map);
-      // if (this.getRoomAlpha(this.activeRoom, this.layer) <= 0) {
-      //   this.activeRoom = room;
-      // }
     }
 
     this.activeRoom = room;
 
-    // Smooth follow the player
-    const smoothFactor = 0.9;
+    const tweenConfigX: Types.Tweens.TweenBuilderConfig = {
+      targets: this.cam,
+      scrollX: this.player.x - this.cam.width * 0.5,
+      duration: 45,
+      ease: "Sine.easeInOut",
+      repeat: 0,
+      yoyo: false,
+    };
+    this.tweens.add(tweenConfigX);
 
-    this.cam.scrollX =
-      smoothFactor * this.cam.scrollX +
-      (1 - smoothFactor) * (this.player.x - this.cam.width * 0.5);
-    this.cam.scrollY =
-      smoothFactor * this.cam.scrollY +
-      (1 - smoothFactor) * (this.player.y - this.cam.height * 0.5);
+    const tweenConfigY: Types.Tweens.TweenBuilderConfig = {
+      targets: this.cam,
+      scrollY: this.player.y - this.cam.height * 0.5,
+      duration: 45,
+      ease: "Sine.easeInOut",
+      repeat: 0,
+      yoyo: false,
+    };
+    this.tweens.add(tweenConfigY);
+    // Smooth follow the player
+    // const smoothFactor = 0.9;
+
+    // this.cam.scrollX =
+    //   smoothFactor * this.cam.scrollX +
+    //   (1 - smoothFactor) * (this.player.x - this.cam.width * 0.5);
+    // this.cam.scrollY =
+    //   smoothFactor * this.cam.scrollY +
+    //   (1 - smoothFactor) * (this.player.y - this.cam.height * 0.5);
   }
 
   // Helpers functions
@@ -439,18 +423,5 @@ class DungeonScene extends Scene {
     }
   }
 }
-
-// const config = {
-//   type: Phaser.AUTO,
-//   width: 800,
-//   height: 600,
-//   backgroundColor: "#2a2a55",
-//   parent: "phaser-example",
-//   pixelArt: true,
-//   roundPixels: false,
-//   scene: Example,
-// };
-
-// const game = new Phaser.Game(config);
 
 export default DungeonScene;
