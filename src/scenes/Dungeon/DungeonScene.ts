@@ -21,6 +21,7 @@ class DungeonScene extends Scene {
   dungeon: Dungeon | null = null;
   map: Tilemaps.Tilemap | null = null;
   player: GameObjects.Graphics | null = null;
+  enemy: GameObjects.Graphics | null = null;
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
   cam: Cameras.Scene2D.Camera | null = null;
   layer: Tilemaps.TilemapLayer | null = null;
@@ -196,8 +197,20 @@ class DungeonScene extends Scene {
         this.map.tileHeight * this.layer.scaleY,
       );
 
+    this.enemy = this.add
+      .graphics({ fillStyle: { color: 11141120, alpha: 1 } })
+      .fillRect(
+        0,
+        0,
+        this.map.tileWidth * this.layer.scaleX,
+        this.map.tileHeight * this.layer.scaleY,
+      );
+
     this.player.x = this.map.tileToWorldX(playerRoom.x + 1) as number;
     this.player.y = this.map.tileToWorldY(playerRoom.y + 1) as number;
+
+    this.enemy.x = this.map.tileToWorldX(playerRoom.x + 3) as number;
+    this.enemy.y = this.map.tileToWorldY(playerRoom.y + 3) as number;
 
     const easyStarGrid = (): number[][] => {
       const grid: number[][] = [];
@@ -214,21 +227,16 @@ class DungeonScene extends Scene {
 
     this.easystar.setGrid(easyStarGrid());
     this.easystar.setAcceptableTiles([0]);
-    this.easystar.findPath(
-      this.map.worldToTileX(this.player.x) as number,
-      this.map.worldToTileY(this.player.y) as number,
-      (this.map.worldToTileX(this.player.x)! + 3) as number,
-      (this.map.worldToTileY(this.player.y)! + 3) as number,
-      (path) => {
-        if (path === null) console.log("Path was not found.");
-        else {
-          console.log(
-            `Path was found. The first Point is ${path[0].x} ${path[0].y}`,
-          );
-        }
-      },
-    );
-    this.easystar.calculate();
+    // this.easystar.findPath(
+    //   this.map.worldToTileX(this.enemy.x) as number,
+    //   this.map.worldToTileY(this.enemy.y) as number,
+    //   this.map.worldToTileX(this.player.x) as number,
+    //   this.map.worldToTileY(this.player.y) as number,
+    //   (path) => {
+    //     if (path) this.enemy?.moveTo(path[0].x, path[0].y);
+    //   },
+    // );
+    // this.easystar.calculate();
 
     if (!debug) {
       // Make the starting room visible
@@ -287,6 +295,7 @@ class DungeonScene extends Scene {
     if (!this.map || !this.player || !this.dungeon || !this.cam) return;
 
     this.updatePlayerMovement(time);
+    this.updateEnemyMovement(time);
 
     const playerTileX: number = this.map.worldToTileX(this.player.x) as number;
     const playerTileY: number = this.map.worldToTileY(this.player.y) as number;
@@ -416,6 +425,80 @@ class DungeonScene extends Scene {
           this.tweens.add(tweenConfig);
           this.lastMoveTime = time;
         }
+      }
+    }
+  }
+
+  updateEnemyMovement(time: number) {
+    if (!this.map || !this.layer || !this.player || !this.enemy) return;
+
+    if (!this.tweens.isTweening(this.enemy)) {
+      this.easystar.findPath(
+        this.map.worldToTileX(this.enemy.x) as number,
+        this.map.worldToTileY(this.enemy.y) as number,
+        this.map.worldToTileX(this.player.x) as number,
+        this.map.worldToTileY(this.player.y) as number,
+        (path) => {
+          if (path) {
+            const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+              targets: this.enemy,
+              y: path[0].y,
+              x: path[0].x,
+              duration: 100,
+              ease: "Linear",
+              repeat: 0,
+              yoyo: false,
+            };
+            this.tweens.add(tweenConfig);
+          }
+          // else console.log("no path found");
+        },
+      );
+      this.easystar.calculate();
+    }
+
+    const th = this.map.tileHeight * this.layer.scaleY;
+    const tw = this.map.tileWidth * this.layer.scaleX;
+    const repeatMoveDelay = 160;
+
+    if (time > this.lastMoveTime + repeatMoveDelay) {
+      if (this.isTileOpenAt(this.enemy.x, this.enemy.y + th, this.map)) {
+        const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+          targets: this.enemy,
+          y: this.player.y + tw,
+          x: this.player.x + tw,
+          duration: 100,
+          ease: "Linear",
+          repeat: 0,
+          yoyo: false,
+          onComplete: () => {
+            if (!this.map || !this.layer || !this.player || !this.enemy) return;
+            this.easystar.findPath(
+              this.map.worldToTileX(this.enemy.x) as number,
+              this.map.worldToTileY(this.enemy.y) as number,
+              this.map.worldToTileX(this.player.x) as number,
+              this.map.worldToTileY(this.player.y) as number,
+              (path) => {
+                if (path) {
+                  const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+                    targets: this.enemy,
+                    y: path[0].y,
+                    x: path[0].x,
+                    duration: 100,
+                    ease: "Linear",
+                    repeat: 0,
+                    yoyo: false,
+                  };
+                  this.tweens.add(tweenConfig);
+                }
+                // else console.log("no path found");
+              },
+            );
+            this.easystar.calculate();
+          },
+        };
+        this.tweens.add(tweenConfig);
+        this.lastMoveTime = time;
       }
     }
   }
