@@ -9,7 +9,6 @@ import {
 } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
-import EnemyManager from "../../managers/EnemyManager";
 
 import useStateStore from "../../context/useStateStore";
 
@@ -28,7 +27,7 @@ class DungeonScene extends Scene {
   layer: Tilemaps.TilemapLayer | null = null;
   layer2: Tilemaps.TilemapLayer | null = null;
   lastMoveTime = 0;
-  // eslint-disable-next-line @babel/new-cap
+  enemyLastMoveTime = 0;
   easystar: EasyStar.js = new EasyStar.js();
   paused: boolean = useStateStore.getState().paused;
 
@@ -198,20 +197,20 @@ class DungeonScene extends Scene {
         this.map.tileHeight * this.layer.scaleY,
       );
 
-    this.enemy = this.add
-      .graphics({ fillStyle: { color: 11141120, alpha: 1 } })
-      .fillRect(
-        0,
-        0,
-        this.map.tileWidth * this.layer.scaleX,
-        this.map.tileHeight * this.layer.scaleY,
-      );
+    // this.enemy = this.add
+    //   .graphics({ fillStyle: { color: 11141120, alpha: 1 } })
+    //   .fillRect(
+    //     0,
+    //     0,
+    //     this.map.tileWidth * this.layer.scaleX,
+    //     this.map.tileHeight * this.layer.scaleY,
+    //   );
 
     this.player.x = this.map.tileToWorldX(playerRoom.x + 1) as number;
     this.player.y = this.map.tileToWorldY(playerRoom.y + 1) as number;
 
-    this.enemy.x = this.map.tileToWorldX(playerRoom.x + 3) as number;
-    this.enemy.y = this.map.tileToWorldY(playerRoom.y + 3) as number;
+    // this.enemy.x = this.map.tileToWorldX(playerRoom.x + 3) as number;
+    // this.enemy.y = this.map.tileToWorldY(playerRoom.y + 3) as number;
 
     const easyStarGrid = (): number[][] => {
       const grid: number[][] = [];
@@ -225,7 +224,7 @@ class DungeonScene extends Scene {
       });
       return grid;
     };
-    
+
     this.easystar.setGrid(easyStarGrid());
     this.easystar.setAcceptableTiles([0]);
     // this.easystar.findPath(
@@ -296,7 +295,7 @@ class DungeonScene extends Scene {
     if (!this.map || !this.player || !this.dungeon || !this.cam) return;
 
     this.updatePlayerMovement(time);
-    this.updateEnemyMovement(time);
+    // this.updateEnemyMovement(time);
 
     const playerTileX: number = this.map.worldToTileX(this.player.x) as number;
     const playerTileY: number = this.map.worldToTileY(this.player.y) as number;
@@ -462,7 +461,7 @@ class DungeonScene extends Scene {
     const tw = this.map.tileWidth * this.layer.scaleX;
     const repeatMoveDelay = 160;
 
-    if (time > this.lastMoveTime + repeatMoveDelay) {
+    if (time > this.enemyLastMoveTime + repeatMoveDelay) {
       if (this.isTileOpenAt(this.enemy.x, this.enemy.y + th, this.map)) {
         const tweenConfig: Types.Tweens.TweenBuilderConfig = {
           targets: this.enemy,

@@ -15,13 +15,15 @@
     },
     "plugins": [
         "react",
-        "unused-imports"
+        "unused-imports",
+        "@babel"
     ],
     "rules": {
         "react/react-in-jsx-scope": "off",
         "no-console": "warn",
         "no-unused-vars": "warn",
         "unused-imports/no-unused-imports": "error",
-        "no-new": "off"
+        "no-new": "off",
+        "@babel/new-cap": "off"
         }
 }
