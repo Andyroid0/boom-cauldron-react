@@ -9,6 +9,7 @@ import {
 } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
+import EnemyManager from "../../managers/EnemyManager";
 
 import useStateStore from "../../context/useStateStore";
 
@@ -224,7 +225,7 @@ class DungeonScene extends Scene {
       });
       return grid;
     };
-
+    
     this.easystar.setGrid(easyStarGrid());
     this.easystar.setAcceptableTiles([0]);
     // this.easystar.findPath(
