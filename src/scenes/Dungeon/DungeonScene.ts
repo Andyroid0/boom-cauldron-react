@@ -2,6 +2,7 @@ import Dungeon, { Room } from "@mikewesthad/dungeon";
 import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
+import EnemyManager from "../../managers/EnemyManager";
 
 import { TILES } from "./tiles.data";
 //  Toggle this to disable the room hiding / layer scale, so you can see the extent of the map easily!
@@ -190,7 +191,7 @@ class DungeonScene extends Scene {
       });
       return grid;
     };
-
+    
     this.easystar.setGrid(easyStarGrid());
     this.easystar.setAcceptableTiles([0]);
     this.easystar.findPath(
