@@ -13,6 +13,9 @@ interface AppState {
 
   loading: boolean;
   setLoading: (value: boolean) => void;
+
+  paused: boolean;
+  togglePaused: () => void;
 }
 
 const useStateStore = create<AppState>()(
@@ -36,6 +39,11 @@ const useStateStore = create<AppState>()(
       loading: false,
       setLoading: (value) => {
         set({ loading: value });
+      },
+
+      paused: false,
+      togglePaused: () => {
+        set({ paused: !get().paused });
       },
     }),
     {

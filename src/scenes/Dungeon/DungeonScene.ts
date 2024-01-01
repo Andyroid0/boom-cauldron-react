@@ -28,9 +28,16 @@ class DungeonScene extends Scene {
   lastMoveTime = 0;
   // eslint-disable-next-line @babel/new-cap
   easystar: EasyStar.js = new EasyStar.js();
+  paused: boolean = useStateStore.getState().paused;
 
   constructor() {
     super("dungeon");
+    const handleEvent = (event: MessageEvent) => {
+      if (event.data === "toggle-pause") {
+        this.paused = !this.paused;
+      }
+    };
+    window.addEventListener("message", handleEvent);
   }
 
   preload() {
@@ -38,6 +45,9 @@ class DungeonScene extends Scene {
   }
 
   create() {
+    this.input.keyboard?.on("keydown-ENTER", () =>
+      window.postMessage("toggle-pause"),
+    );
     //  40,000 tile test
     this.dungeon = new Dungeon({
       width: 200,
@@ -271,6 +281,8 @@ class DungeonScene extends Scene {
   }
 
   update(time: number, delta: number) {
+    if (this.paused) return;
+
     // Maybe set a loading screen here?
     if (!this.map || !this.player || !this.dungeon || !this.cam) return;
 
