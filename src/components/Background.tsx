@@ -16,6 +16,9 @@ const Background: FC<BackgroundProps> = (props) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        position: "absolute",
+        top: 0,
+        left: 0,
       }}
     >
       {children}

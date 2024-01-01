@@ -1,11 +1,20 @@
 import Dungeon, { Room } from "@mikewesthad/dungeon";
-import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
+import {
+  Cameras,
+  GameObjects,
+  Scene,
+  Tilemaps,
+  Types,
+  // Math as PMath,
+} from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
 
+import useStateStore from "../../context/useStateStore";
+
 import { TILES } from "./tiles.data";
-//  Toggle this to disable the room hiding / layer scale, so you can see the extent of the map easily!
-const debug = false;
+
+const { debug, showCamGUI } = useStateStore.getState();
 
 class DungeonScene extends Scene {
   activeRoom: Room | null = null;
@@ -15,6 +24,7 @@ class DungeonScene extends Scene {
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
   cam: Cameras.Scene2D.Camera | null = null;
   layer: Tilemaps.TilemapLayer | null = null;
+  layer2: Tilemaps.TilemapLayer | null = null;
   lastMoveTime = 0;
   // eslint-disable-next-line @babel/new-cap
   easystar: EasyStar.js = new EasyStar.js();
@@ -59,6 +69,7 @@ class DungeonScene extends Scene {
     ) as Tilemaps.Tileset;
 
     this.layer = this.map.createBlankLayer("Layer 1", tileset);
+    // this.layer2 = this.map.createBlankLayer("Layer 2", tileset);
 
     if (!this.layer) {
       console.error("layer is null or undefined.");
@@ -126,10 +137,10 @@ class DungeonScene extends Scene {
       const rand = Math.random();
       if (rand <= 0.25) {
         // Chest
-        this.layer.putTileAt(89, cx, cy);
+        this.layer2?.putTileAt(89, cx, cy);
       } else if (rand <= 0.3) {
         // Stairs
-        this.layer.putTileAt(85, cx, cy);
+        this.layer2?.putTileAt(85, cx, cy);
       }
       // else if (rand <= 0.4) {
       //   // Trap door
@@ -199,11 +210,11 @@ class DungeonScene extends Scene {
       (this.map.worldToTileX(this.player.x)! + 3) as number,
       (this.map.worldToTileY(this.player.y)! + 3) as number,
       (path) => {
-        // eslint-disable-next-line no-alert
-        if (path === null) alert("Path was not found.");
+        if (path === null) console.log("Path was not found.");
         else {
-          // eslint-disable-next-line no-alert
-          alert(`Path was found. The first Point is ${path[0].x} ${path[0].y}`);
+          console.log(
+            `Path was found. The first Point is ${path[0].x} ${path[0].y}`,
+          );
         }
       },
     );
@@ -230,30 +241,33 @@ class DungeonScene extends Scene {
       this.cursors = this.input.keyboard.createCursorKeys();
     } else console.warn("Keyboard isn't present.");
 
-    const textStyle: Types.GameObjects.Text.TextStyle = {
-      fontSize: "18px",
-      padding: { x: 10, y: 5 },
-      color: "#ffffff",
-      backgroundColor: "#000000",
-      fontFamily: "Mana",
-    };
+    // const textStyle: Types.GameObjects.Text.TextStyle = {
+    //   fontSize: "18px",
+    //   padding: { x: 10, y: 5 },
+    //   color: "#ffffff",
+    //   backgroundColor: "#000000",
+    //   fontFamily: "Mana",
+    // };
 
-    const help = this.add.text(16, 16, "Arrows keys to move", textStyle);
+    // const help = this.add.text(16, 16, "Arrows keys to move", textStyle);
 
-    help.setScrollFactor(0);
+    // help.setScrollFactor(0);
 
-    const gui = new dat.GUI();
+    if (showCamGUI) {
+      const gui = new dat.GUI();
 
-    gui.addFolder("Camera");
-    gui.add(this.cam, "scrollX").listen();
-    gui.add(this.cam, "scrollY").listen();
-    gui.add(this.cam, "zoom", 0.1, 4).step(0.1);
-    // gui.add(this.cam, "rotation").step(0.01);
-    gui.add(this.layer, "skipCull").listen();
-    gui.add(this.layer, "cullPaddingX").step(1);
-    gui.add(this.layer, "cullPaddingY").step(1);
-    gui.add(this.layer, "tilesDrawn").listen();
-    gui.add(this.layer, "tilesTotal").listen();
+      gui.addFolder("Camera");
+      gui.add(this.cam, "scrollX").listen();
+      gui.add(this.cam, "scrollY").listen();
+      gui.add(this.cam, "zoom", 0.1, 4).step(0.1);
+      gui.add(this.layer, "skipCull").listen();
+      gui.add(this.layer, "cullPaddingX").step(1);
+      gui.add(this.layer, "cullPaddingY").step(1);
+      gui.add(this.layer, "tilesDrawn").listen();
+      gui.add(this.layer, "tilesTotal").listen();
+    }
+
+    this.cam.startFollow(this.player, true, 0.1, 0.1);
   }
 
   update(time: number, delta: number) {
@@ -295,35 +309,6 @@ class DungeonScene extends Scene {
     }
 
     this.activeRoom = room;
-
-    const tweenConfigX: Types.Tweens.TweenBuilderConfig = {
-      targets: this.cam,
-      scrollX: this.player.x - this.cam.width * 0.5,
-      duration: 45,
-      ease: "Sine.easeInOut",
-      repeat: 0,
-      yoyo: false,
-    };
-    this.tweens.add(tweenConfigX);
-
-    const tweenConfigY: Types.Tweens.TweenBuilderConfig = {
-      targets: this.cam,
-      scrollY: this.player.y - this.cam.height * 0.5,
-      duration: 45,
-      ease: "Sine.easeInOut",
-      repeat: 0,
-      yoyo: false,
-    };
-    this.tweens.add(tweenConfigY);
-    // Smooth follow the player
-    // const smoothFactor = 0.9;
-
-    // this.cam.scrollX =
-    //   smoothFactor * this.cam.scrollX +
-    //   (1 - smoothFactor) * (this.player.x - this.cam.width * 0.5);
-    // this.cam.scrollY =
-    //   smoothFactor * this.cam.scrollY +
-    //   (1 - smoothFactor) * (this.player.y - this.cam.height * 0.5);
   }
 
   // Helpers functions
