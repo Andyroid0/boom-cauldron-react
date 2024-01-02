@@ -24,6 +24,8 @@
         "no-unused-vars": "warn",
         "unused-imports/no-unused-imports": "error",
         "no-new": "off",
-        "@babel/new-cap": "off"
+        "@babel/new-cap": "off",
+        "@typescript-eslint/no-extraneous-class": "off",
+        "@shopify/strict-component-boundaries": "off"
         }
 }

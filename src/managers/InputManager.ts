@@ -1,5 +1,8 @@
 import { Input, Scene, Types } from "phaser";
 
+import useStateStore from "../context/useStateStore";
+import MessageService from "../services/MessageService";
+
 class InputManager {
   scene: Scene;
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
@@ -12,14 +15,23 @@ class InputManager {
 
   update() {
     if (!this.cursors) return;
-    if (this.cursors.left.isDown) {
-      console.log("Left arrow key pressed");
-    } else if (this.cursors.right.isDown) {
-      console.log("Right arrow key pressed");
-    } else if (this.cursors.up.isDown) {
-      console.log("Up arrow key pressed");
-    } else if (this.cursors.down.isDown) {
-      console.log("Down arrow key pressed");
+    // interact with using the Message Service.
+    if (this.cursors.left.isDown && !useStateStore.getState().left) {
+      MessageService.send("toggle-left");
+    } else if (this.cursors.right.isDown && !useStateStore.getState().right) {
+      MessageService.send("toggle-right");
+    } else if (this.cursors.up.isDown && !useStateStore.getState().up) {
+      MessageService.send("toggle-up");
+    } else if (this.cursors.down.isDown && !useStateStore.getState().down) {
+      MessageService.send("toggle-down");
+    } else if (this.cursors.left.isUp && useStateStore.getState().left) {
+      MessageService.send("toggle-left");
+    } else if (this.cursors.right.isUp && useStateStore.getState().right) {
+      MessageService.send("toggle-right");
+    } else if (this.cursors.up.isUp && useStateStore.getState().up) {
+      MessageService.send("toggle-up");
+    } else if (this.cursors.down.isUp && useStateStore.getState().down) {
+      MessageService.send("toggle-down");
     }
   }
 

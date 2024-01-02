@@ -1,4 +1,5 @@
 import { Scene, Tilemaps } from "phaser";
+import { Room } from "@mikewesthad/dungeon";
 
 import Player from "../entities/Player.entity.class";
 
@@ -19,8 +20,15 @@ class PlayerManager implements PlayerManager {
     this.layer = layer;
   }
 
-  create() {
-    this.pool.push(new Player(this.map, this.scene, this.layer));
+  create(room: Room, coordX: number, coordY: number) {
+    const player = new Player(this.map, this.scene, this.layer);
+    this.pool.push(player);
+    player.x = this.map.tileToWorldX(room.x + coordX) as number;
+    player.y = this.map.tileToWorldY(room.y + coordY) as number;
+  }
+
+  player1() {
+    return this.pool[0];
   }
 }
 
