@@ -1,12 +1,5 @@
 import Dungeon, { Room } from "@mikewesthad/dungeon";
-import {
-  Cameras,
-  GameObjects,
-  Scene,
-  Tilemaps,
-  Types,
-  // Math as PMath,
-} from "phaser";
+import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
 
@@ -41,12 +34,6 @@ class DungeonScene extends Scene {
   constructor() {
     super("dungeon");
     this.messageService = new MessageService(this.state);
-    // const handleEvent = (event: MessageEvent) => {
-    //   if (event.data === "toggle-pause") {
-    //     state.paused = !this.paused;
-    //   }
-    // };
-    // window.addEventListener("message", handleEvent);
   }
 
   preload() {
@@ -200,15 +187,6 @@ class DungeonScene extends Scene {
     this.playerManager = new PlayerManager(this.map, this, this.layer);
     this.playerManager.create(playerRoom, 1, 1);
 
-    // this.player = this.add
-    //   .graphics({ fillStyle: { color: 0xedca40, alpha: 1 } })
-    //   .fillRect(
-    //     0,
-    //     0,
-    //     this.map.tileWidth * this.layer.scaleX,
-    //     this.map.tileHeight * this.layer.scaleY,
-    //   );
-
     // this.enemy = this.add
     //   .graphics({ fillStyle: { color: 11141120, alpha: 1 } })
     //   .fillRect(
@@ -217,9 +195,6 @@ class DungeonScene extends Scene {
     //     this.map.tileWidth * this.layer.scaleX,
     //     this.map.tileHeight * this.layer.scaleY,
     //   );
-
-    // this.player.x = this.map.tileToWorldX(playerRoom.x + 1) as number;
-    // this.player.y = this.map.tileToWorldY(playerRoom.y + 1) as number;
 
     // this.enemy.x = this.map.tileToWorldX(playerRoom.x + 3) as number;
     // this.enemy.y = this.map.tileToWorldY(playerRoom.y + 3) as number;
@@ -239,16 +214,6 @@ class DungeonScene extends Scene {
 
     this.easystar.setGrid(easyStarGrid());
     this.easystar.setAcceptableTiles([0]);
-    // this.easystar.findPath(
-    //   this.map.worldToTileX(this.enemy.x) as number,
-    //   this.map.worldToTileY(this.enemy.y) as number,
-    //   this.map.worldToTileX(this.player.x) as number,
-    //   this.map.worldToTileY(this.player.y) as number,
-    //   (path) => {
-    //     if (path) this.enemy?.moveTo(path[0].x, path[0].y);
-    //   },
-    // );
-    // this.easystar.calculate();
 
     if (!debug) {
       // Make the starting room visible
@@ -368,80 +333,6 @@ class DungeonScene extends Scene {
     const tiles = layer.getTilesWithin(room.x, room.y, room.width, room.height);
     return tiles[0].alpha;
   }
-
-  // updateEnemyMovement(time: number) {
-  //   if (!this.map || !this.layer || !this.player || !this.enemy) return;
-
-  //   if (!this.tweens.isTweening(this.enemy)) {
-  //     this.easystar.findPath(
-  //       this.map.worldToTileX(this.enemy.x) as number,
-  //       this.map.worldToTileY(this.enemy.y) as number,
-  //       this.map.worldToTileX(this.player.x) as number,
-  //       this.map.worldToTileY(this.player.y) as number,
-  //       (path) => {
-  //         if (path) {
-  //           const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-  //             targets: this.enemy,
-  //             y: path[0].y,
-  //             x: path[0].x,
-  //             duration: 100,
-  //             ease: "Linear",
-  //             repeat: 0,
-  //             yoyo: false,
-  //           };
-  //           this.tweens.add(tweenConfig);
-  //         }
-  //         // else console.log("no path found");
-  //       },
-  //     );
-  //     this.easystar.calculate();
-  //   }
-
-  //   const th = this.map.tileHeight * this.layer.scaleY;
-  //   const tw = this.map.tileWidth * this.layer.scaleX;
-  //   const repeatMoveDelay = 160;
-
-  //   if (time > this.enemyLastMoveTime + repeatMoveDelay) {
-  //     if (this.isTileOpenAt(this.enemy.x, this.enemy.y + th, this.map)) {
-  //       const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-  //         targets: this.enemy,
-  //         y: this.player.y + tw,
-  //         x: this.player.x + tw,
-  //         duration: 100,
-  //         ease: "Linear",
-  //         repeat: 0,
-  //         yoyo: false,
-  //         onComplete: () => {
-  //           if (!this.map || !this.layer || !this.player || !this.enemy) return;
-  //           this.easystar.findPath(
-  //             this.map.worldToTileX(this.enemy.x) as number,
-  //             this.map.worldToTileY(this.enemy.y) as number,
-  //             this.map.worldToTileX(this.player.x) as number,
-  //             this.map.worldToTileY(this.player.y) as number,
-  //             (path) => {
-  //               if (path) {
-  //                 const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-  //                   targets: this.enemy,
-  //                   y: path[0].y,
-  //                   x: path[0].x,
-  //                   duration: 100,
-  //                   ease: "Linear",
-  //                   repeat: 0,
-  //                   yoyo: false,
-  //                 };
-  //                 this.tweens.add(tweenConfig);
-  //               }
-  //               // else console.log("no path found");
-  //             },
-  //           );
-  //           this.easystar.calculate();
-  //         },
-  //       };
-  //       this.tweens.add(tweenConfig);
-  //       this.lastMoveTime = time;
-  //     }
-  //   }
-  // }
 }
 
 export default DungeonScene;

@@ -21,7 +21,76 @@ class Enemy implements Enemy {
     this.player?.takeDamage();
   }
 
-  update() {}
+  update() {
+    // if (!this.map || !this.layer || !this.player || !this.enemy) return;
+    // if (!this.tweens.isTweening(this.enemy)) {
+    //   this.easystar.findPath(
+    //     this.map.worldToTileX(this.enemy.x) as number,
+    //     this.map.worldToTileY(this.enemy.y) as number,
+    //     this.map.worldToTileX(this.player.x) as number,
+    //     this.map.worldToTileY(this.player.y) as number,
+    //     (path) => {
+    //       if (path) {
+    //         const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+    //           targets: this.enemy,
+    //           y: path[0].y,
+    //           x: path[0].x,
+    //           duration: 100,
+    //           ease: "Linear",
+    //           repeat: 0,
+    //           yoyo: false,
+    //         };
+    //         this.tweens.add(tweenConfig);
+    //       }
+    //       // else console.log("no path found");
+    //     },
+    //   );
+    //   this.easystar.calculate();
+    // }
+    // const th = this.map.tileHeight * this.layer.scaleY;
+    // const tw = this.map.tileWidth * this.layer.scaleX;
+    // const repeatMoveDelay = 160;
+    // if (time > this.enemyLastMoveTime + repeatMoveDelay) {
+    //   if (this.isTileOpenAt(this.enemy.x, this.enemy.y + th, this.map)) {
+    //     const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+    //       targets: this.enemy,
+    //       y: this.player.y + tw,
+    //       x: this.player.x + tw,
+    //       duration: 100,
+    //       ease: "Linear",
+    //       repeat: 0,
+    //       yoyo: false,
+    //       onComplete: () => {
+    //         if (!this.map || !this.layer || !this.player || !this.enemy) return;
+    //         this.easystar.findPath(
+    //           this.map.worldToTileX(this.enemy.x) as number,
+    //           this.map.worldToTileY(this.enemy.y) as number,
+    //           this.map.worldToTileX(this.player.x) as number,
+    //           this.map.worldToTileY(this.player.y) as number,
+    //           (path) => {
+    //             if (path) {
+    //               const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+    //                 targets: this.enemy,
+    //                 y: path[0].y,
+    //                 x: path[0].x,
+    //                 duration: 100,
+    //                 ease: "Linear",
+    //                 repeat: 0,
+    //                 yoyo: false,
+    //               };
+    //               this.tweens.add(tweenConfig);
+    //             }
+    //             // else console.log("no path found");
+    //           },
+    //         );
+    //         this.easystar.calculate();
+    //       },
+    //     };
+    //     this.tweens.add(tweenConfig);
+    //     this.lastMoveTime = time;
+    //   }
+    // }
+  }
 
   findPath() {
     if (!this.player)
