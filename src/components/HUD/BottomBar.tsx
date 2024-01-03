@@ -12,6 +12,7 @@ const BottomBar: FC<TopBarProps> = (props) => {
     <AppBar
       position="fixed"
       sx={{
+        position: "absolute",
         top: "auto",
         bottom: 0,
         backgroundColor: "rgba(0,0,0,0)",
