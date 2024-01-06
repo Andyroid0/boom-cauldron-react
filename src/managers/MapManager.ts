@@ -42,7 +42,6 @@ class MapManager {
     map: Tilemaps.Tilemap,
     layer: Tilemaps.TilemapLayer,
     scene: Scene,
-    debug?: boolean,
   ) {
     // Use the array of rooms generated to place tiles in the map
     dungeon.rooms.forEach((room) => {

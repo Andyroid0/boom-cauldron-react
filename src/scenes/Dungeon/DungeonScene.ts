@@ -48,8 +48,8 @@ class DungeonScene extends Scene {
 
     //  40,000 tile test
     this.dungeon = new Dungeon({
-      width: 200,
-      height: 200,
+      width: 60,
+      height: 60,
       rooms: {
         width: { min: 7, max: 20, onlyOdd: true },
         height: { min: 7, max: 20, onlyOdd: true },

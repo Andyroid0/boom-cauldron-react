@@ -31,6 +31,9 @@ interface AppState {
 
   grab: boolean;
   toggleGrab: () => void;
+
+  playerHealth: number;
+  setPlayerHealth: (value: number) => void;
 }
 
 const useStateStore = create<AppState>()(
@@ -84,6 +87,11 @@ const useStateStore = create<AppState>()(
       grab: false,
       toggleGrab: () => {
         set({ grab: !get().grab });
+      },
+
+      playerHealth: 10,
+      setPlayerHealth: (value) => {
+        set({ playerHealth: value });
       },
     }),
     {

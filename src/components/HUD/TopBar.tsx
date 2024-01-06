@@ -1,13 +1,20 @@
 import { FC } from "react";
 import { AppBar, Box, LinearProgress } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { useShallow } from "zustand/react/shallow";
+
+import useStateStore from "../../context/useStateStore";
 
 interface TopBarProps {}
 
 const TopBar: FC<TopBarProps> = (props) => {
   // eslint-disable-next-line no-empty-pattern
   const {} = props;
-
+  const { playerHealth } = useStateStore(
+    useShallow((state) => ({
+      playerHealth: state.playerHealth,
+    })),
+  );
   return (
     <AppBar
       position="static"
@@ -21,7 +28,7 @@ const TopBar: FC<TopBarProps> = (props) => {
         />
         <LinearProgress
           variant="determinate"
-          value={25}
+          value={playerHealth * 10}
           sx={{
             width: "200px",
             height: "8px",
