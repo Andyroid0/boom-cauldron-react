@@ -10,5 +10,6 @@ class EnemyDeps {
   map: Tilemaps.Tilemap | undefined;
   easyStar: EasyStar.js | undefined;
   etype: EnemyType | undefined;
+  layer: Tilemaps.TilemapLayer | undefined;
 }
 export default EnemyDeps;

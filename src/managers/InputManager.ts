@@ -11,6 +11,9 @@ class InputManager {
     this.scene = scene;
     this.cursors = scene.input.keyboard?.createCursorKeys();
     scene.input.on("pointerdown", this.handlePointerDown, this);
+    scene.input.keyboard?.on("keydown-ENTER", () =>
+      window.postMessage("toggle-pause"),
+    );
   }
 
   update() {

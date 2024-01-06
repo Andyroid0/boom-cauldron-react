@@ -25,6 +25,7 @@ class PlayerManager implements PlayerManager {
     this.pool.push(player);
     player.x = this.map.tileToWorldX(room.x + coordX) as number;
     player.y = this.map.tileToWorldY(room.y + coordY) as number;
+    return player;
   }
 
   player1() {
