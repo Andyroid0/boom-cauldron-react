@@ -1,63 +1,66 @@
-import { Input, GameObjects, Scene, Types, Tilemaps } from "phaser";
 import EasyStar from "easystarjs";
+import { Scene, Tilemaps } from "phaser";
+import { Room } from "@mikewesthad/dungeon";
 
-class EnemyManager {
-    protected health: number; 
-    easyStar: EasyStar.js = new EasyStar.js();
-    map: Tilemaps.Tilemap | null = null;
-    player: GameObjects.Graphics | null = null;
+import Player from "../entities/Player.entity.class";
+import EnemyDeps from "../types/EnemyDeps.dependencies.class";
+import Enemy from "../entities/Enemy.entity.class";
+import EnemyType from "../types/EnemyType.type";
 
-    constructor(health: number, easyStar: EasyStar.js) {
-        this.health = health;
-        this.easyStar = easyStar;
-    }
+interface EnemyManager extends EnemyDeps {}
+class EnemyManager implements EnemyManager {
+  pool: Enemy[] = [];
+  map!: Tilemaps.Tilemap;
+  scene!: Scene;
+  layer!: Tilemaps.TilemapLayer;
+  player!: Player;
 
-    takeDamage(damage: number) {
-        this.health -= damage;
-        console.log( 'you reffed me and damaged my snarl')
-    }
+  constructor(
+    map: Tilemaps.Tilemap,
+    scene: Scene,
+    layer: Tilemaps.TilemapLayer,
+    player: Player,
+  ) {
+    this.easyStar = new EasyStar.js();
+    this.scene = scene;
+    this.map = map;
+    this.layer = layer;
+    this.player = player;
 
-    findPath() {
-        if (!this.map || !this.player) return;
+    const easyStarGrid = (): number[][] => {
+      const grid: number[][] = [];
+      this.map!.layers[0].data.forEach((row) => {
+        const newRow: number[] = [];
+        row.forEach((tile) => {
+          if (tile.collides) newRow.push(1);
+          else newRow.push(0);
+        });
+        grid.push(newRow);
+      });
+      return grid;
+    };
 
-        this.easyStar.findPath(
-            this.map.worldToTileX(this.x) as number,
-            this.map.worldToTileY(this.y) as number,
-            this.map.worldToTileX(this.player.x) as number,
-            this.map.worldToTileY(this.player.y) as number,
-            (path) => {
-              // eslint-disable-next-line no-alert
-              if (path === null) alert("Path was not found.");
-              else {
-                // eslint-disable-next-line no-alert
-                alert(`Path was found. The first Point is ${path[0].x} ${path[0].y}`);
-              }
-            },
-          );
-          this.easyStar.calculate();
-    }
-}
+    this.easyStar.setGrid(easyStarGrid());
+    this.easyStar.setAcceptableTiles([0]);
+  }
 
-class Player extends EnemyManager {
-    constructor(health: number) {
-        super (health);
-    }
-
-    attack(enemy: Enemy) {
-        const damage = 10;
-        enemy.takeDamage(damage);
-    }
-}
-
-class Enemy extends EnemyManager {
-constructor(health: number) {
-    super(health);
-}
-
-update(player: Player) {
-    player.takeDamage(5);
-    console.log('Someone broke my reff and made me take damage')
-}
+  create(room: Room, coordX: number, coordY: number, type: EnemyType) {
+    const enemy = new Enemy({
+      dependencies: {
+        map: this.map,
+        easyStar: this.easyStar,
+        player: this.player,
+        etype: type,
+        layer: this.layer,
+      },
+      scene: this.scene,
+      options: null,
+      multiplier: 1,
+    });
+    this.pool.push(enemy);
+    enemy.x = this.map.tileToWorldX(room.x + coordX) as number;
+    enemy.y = this.map.tileToWorldY(room.y + coordY) as number;
+  }
 }
 
 export default EnemyManager;
