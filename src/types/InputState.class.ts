@@ -1,6 +1,6 @@
 import useStateStore from "../context/useStateStore";
 
-export default class DungeonState {
+export default class InputState {
   public paused = useStateStore.getState().paused;
   public left = useStateStore.getState().left;
   public right = useStateStore.getState().right;

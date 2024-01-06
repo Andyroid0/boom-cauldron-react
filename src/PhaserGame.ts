@@ -1,4 +1,3 @@
-/* eslint-disable @shopify/strict-component-boundaries */
 import Phaser from "phaser";
 
 import Bootstrap from "./scenes/Bootstrap";
