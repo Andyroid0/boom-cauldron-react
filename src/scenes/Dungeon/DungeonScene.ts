@@ -1,17 +1,14 @@
 import Dungeon, { Room } from "@mikewesthad/dungeon";
-import {
-  Cameras,
-  GameObjects,
-  Scene,
-  Tilemaps,
-  Types,
-  // Math as PMath,
-} from "phaser";
+import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
-import EnemyManager from "../../managers/EnemyManager";
 
+import PlayerManager from "../../managers/PlayerManager";
 import useStateStore from "../../context/useStateStore";
+import DungeonState from "../../types/DungeonState.class";
+import MessageService from "../../services/MessageService";
+import InputManager from "../../managers/InputManager";
+import EnemyManager from "../../managers/EnemyManager";
 
 import { TILES } from "./tiles.data";
 
@@ -22,23 +19,23 @@ class DungeonScene extends Scene {
   dungeon: Dungeon | null = null;
   map: Tilemaps.Tilemap | null = null;
   player: GameObjects.Graphics | null = null;
+  enemy: GameObjects.Graphics | null = null;
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
   cam: Cameras.Scene2D.Camera | null = null;
-  layer: Tilemaps.TilemapLayer | null = null;
+  layer!: Tilemaps.TilemapLayer;
   layer2: Tilemaps.TilemapLayer | null = null;
   lastMoveTime = 0;
-  // eslint-disable-next-line @babel/new-cap
+  enemyLastMoveTime = 0;
   easystar: EasyStar.js = new EasyStar.js();
-  paused: boolean = useStateStore.getState().paused;
+  enemyManager: EnemyManager | undefined;
+  playerManager: PlayerManager | undefined;
+  messageService!: MessageService;
+  state: DungeonState = new DungeonState();
+  inputService!: InputManager;
 
   constructor() {
     super("dungeon");
-    const handleEvent = (event: MessageEvent) => {
-      if (event.data === "toggle-pause") {
-        this.paused = !this.paused;
-      }
-    };
-    window.addEventListener("message", handleEvent);
+    this.messageService = new MessageService(this.state);
   }
 
   preload() {
@@ -46,9 +43,8 @@ class DungeonScene extends Scene {
   }
 
   create() {
-    this.input.keyboard?.on("keydown-ENTER", () =>
-      window.postMessage("toggle-pause"),
-    );
+    this.inputService = new InputManager(this);
+
     //  40,000 tile test
     this.dungeon = new Dungeon({
       width: 200,
@@ -79,16 +75,15 @@ class DungeonScene extends Scene {
       { x: 0, y: 0 },
     ) as Tilemaps.Tileset;
 
-    this.layer = this.map.createBlankLayer("Layer 1", tileset);
+    this.layer = this.map.createBlankLayer(
+      "Layer 1",
+      tileset,
+    ) as Tilemaps.TilemapLayer;
     // this.layer2 = this.map.createBlankLayer("Layer 2", tileset);
-
-    if (!this.layer) {
-      console.error("layer is null or undefined.");
-      return;
-    }
 
     if (!debug) {
       this.layer.setScale(3);
+      // this.layer2?.setScale(3);
     }
 
     // Fill with black tiles
@@ -188,48 +183,27 @@ class DungeonScene extends Scene {
     // Place the player in the first room
     const playerRoom = this.dungeon.rooms[0];
 
-    this.player = this.add
-      .graphics({ fillStyle: { color: 0xedca40, alpha: 1 } })
-      .fillRect(
-        0,
-        0,
-        this.map.tileWidth * this.layer.scaleX,
-        this.map.tileHeight * this.layer.scaleY,
-      );
+    // const easyStarGrid = (): number[][] => {
+    //   const grid: number[][] = [];
+    //   this.map!.layers[0].data.forEach((row) => {
+    //     const newRow: number[] = [];
+    //     row.forEach((tile) => {
+    //       if (tile.collides) newRow.push(1);
+    //       else newRow.push(0);
+    //     });
+    //     grid.push(newRow);
+    //   });
+    //   return grid;
+    // };
 
-    this.player.x = this.map.tileToWorldX(playerRoom.x + 1) as number;
-    this.player.y = this.map.tileToWorldY(playerRoom.y + 1) as number;
+    // this.easystar.setGrid(easyStarGrid());
+    // this.easystar.setAcceptableTiles([0]);
 
-    const easyStarGrid = (): number[][] => {
-      const grid: number[][] = [];
-      this.map!.layers[0].data.forEach((row) => {
-        const newRow: number[] = [];
-        row.forEach((tile) => {
-          if (tile.collides) newRow.push(1);
-          else newRow.push(0);
-        });
-        grid.push(newRow);
-      });
-      return grid;
-    };
-    
-    this.easystar.setGrid(easyStarGrid());
-    this.easystar.setAcceptableTiles([0]);
-    this.easystar.findPath(
-      this.map.worldToTileX(this.player.x) as number,
-      this.map.worldToTileY(this.player.y) as number,
-      (this.map.worldToTileX(this.player.x)! + 3) as number,
-      (this.map.worldToTileY(this.player.y)! + 3) as number,
-      (path) => {
-        if (path === null) console.log("Path was not found.");
-        else {
-          console.log(
-            `Path was found. The first Point is ${path[0].x} ${path[0].y}`,
-          );
-        }
-      },
-    );
-    this.easystar.calculate();
+    this.playerManager = new PlayerManager(this.map, this, this.layer);
+    const player = this.playerManager.create(playerRoom, 1, 1);
+    this.enemyManager = new EnemyManager(this.map, this, this.layer, player);
+
+    this.enemyManager.create(playerRoom, 3, 3, "lab-bot");
 
     if (!debug) {
       // Make the starting room visible
@@ -245,8 +219,8 @@ class DungeonScene extends Scene {
       this.layer.width * this.layer.scaleX,
       this.layer.height * this.layer.scaleY,
     );
-    this.cam.scrollX = this.player.x - this.cam.width * 0.5;
-    this.cam.scrollY = this.player.y - this.cam.height * 0.5;
+    this.cam.scrollX = this.playerManager.pool[0].x - this.cam.width * 0.5;
+    this.cam.scrollY = this.playerManager.pool[0].y - this.cam.height * 0.5;
 
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
@@ -278,19 +252,29 @@ class DungeonScene extends Scene {
       gui.add(this.layer, "tilesTotal").listen();
     }
 
-    this.cam.startFollow(this.player, true, 0.1, 0.1);
+    this.cam.startFollow(this.playerManager.player1(), true, 0.1, 0.1);
   }
 
   update(time: number, delta: number) {
-    if (this.paused) return;
+    if (this.state.paused) return;
 
+    this.inputService.update();
     // Maybe set a loading screen here?
-    if (!this.map || !this.player || !this.dungeon || !this.cam) return;
+    if (!this.map || !this.dungeon || !this.cam) return;
 
-    this.updatePlayerMovement(time);
+    this.playerManager?.pool.forEach((player) => {
+      player.update(time);
+    });
+    this.enemyManager?.pool.forEach((enemy) => {
+      enemy.update(time);
+    });
 
-    const playerTileX: number = this.map.worldToTileX(this.player.x) as number;
-    const playerTileY: number = this.map.worldToTileY(this.player.y) as number;
+    const playerTileX: number = this.map.worldToTileX(
+      this.playerManager?.pool[0].x as number,
+    ) as number;
+    const playerTileY: number = this.map.worldToTileY(
+      this.playerManager?.pool[0].y as number,
+    ) as number;
 
     // Another helper method from the dungeon - dungeon XY (in tiles) -> room
     const room = this.dungeon.getRoomAt(playerTileX, playerTileY);
@@ -341,84 +325,6 @@ class DungeonScene extends Scene {
   getRoomAlpha(room: Room, layer: Tilemaps.TilemapLayer) {
     const tiles = layer.getTilesWithin(room.x, room.y, room.width, room.height);
     return tiles[0].alpha;
-  }
-
-  isTileOpenAt(worldX: number, worldY: number, map: Tilemaps.Tilemap) {
-    // nonNull = true, don't return null for empty tiles. This means null will be returned only for
-    // tiles outside of the bounds of the map.
-    const tile = map.getTileAtWorldXY(worldX, worldY, true);
-
-    if (tile && !tile.collides) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  updatePlayerMovement(time: number) {
-    if (!this.map || !this.layer || !this.player || !this.cursors) return;
-
-    const tw = this.map.tileWidth * this.layer.scaleX;
-    const th = this.map.tileHeight * this.layer.scaleY;
-    const repeatMoveDelay = 160;
-
-    if (time > this.lastMoveTime + repeatMoveDelay) {
-      if (this.cursors.down.isDown) {
-        if (this.isTileOpenAt(this.player.x, this.player.y + th, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this.player,
-            y: this.player.y + th,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
-      } else if (this.cursors.up.isDown) {
-        if (this.isTileOpenAt(this.player.x, this.player.y - th, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this.player,
-            y: this.player.y - th,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
-      }
-
-      if (this.cursors.left.isDown) {
-        if (this.isTileOpenAt(this.player.x - tw, this.player.y, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this.player,
-            x: this.player.x - tw,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
-      } else if (this.cursors.right.isDown) {
-        if (this.isTileOpenAt(this.player.x + tw, this.player.y, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this.player,
-            x: this.player.x + tw,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
-      }
-    }
   }
 }
 
