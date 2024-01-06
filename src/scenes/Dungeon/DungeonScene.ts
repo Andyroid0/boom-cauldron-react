@@ -2,6 +2,7 @@ import Dungeon, { Room } from "@mikewesthad/dungeon";
 import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
+
 import PlayerManager from "../../managers/PlayerManager";
 import useStateStore from "../../context/useStateStore";
 import InputState from "../../types/InputState.class";

@@ -1,4 +1,4 @@
-import DungeonState from "../types/DungeonState.class";
+import InputState from "../types/InputState.class";
 import MessageServiceType from "../types/MessageServiceType.type";
 
 export default class MessageService {
@@ -6,7 +6,7 @@ export default class MessageService {
     window.postMessage(msg);
   }
 
-  constructor(context: DungeonState) {
+  constructor(context: InputState) {
     const handleEvent = (event: MessageEvent) => {
       switch (event.data as MessageServiceType) {
         case "toggle-pause":
