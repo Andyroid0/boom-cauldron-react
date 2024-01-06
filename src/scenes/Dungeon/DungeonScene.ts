@@ -143,10 +143,10 @@ class DungeonScene extends Scene {
       const rand = Math.random();
       if (rand <= 0.25) {
         // Chest
-        this.layer2?.putTileAt(89, cx, cy);
+        this.layer?.putTileAt(89, cx, cy);
       } else if (rand <= 0.3) {
         // Stairs
-        this.layer2?.putTileAt(85, cx, cy);
+        this.layer?.putTileAt(85, cx, cy);
       }
       // else if (rand <= 0.4) {
       //   // Trap door

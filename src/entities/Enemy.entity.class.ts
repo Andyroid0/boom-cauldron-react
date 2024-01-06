@@ -37,81 +37,45 @@ class Enemy extends GameObjects.Graphics implements Enemy {
 
   update(time: number) {
     if (!this.map || !this.layer || !this.player) return;
-    const th = this.map.tileHeight * this.layer.scaleY;
-    const tw = this.map.tileWidth * this.layer.scaleX;
     const repeatMoveDelay = 600;
     if (time > this.lastMoveTime + repeatMoveDelay) {
-      if (TileTools.isTileOpenAt(this.x, this.y + th, this.map)) {
-        if (!this.scene.tweens.isTweening(this)) {
-          this.easyStar!.findPath(
-            this.map.worldToTileX(this.x) as number,
-            this.map.worldToTileY(this.y) as number,
-            this.map.worldToTileX(this.player.x) as number,
-            this.map.worldToTileY(this.player.y) as number,
-            (path) => {
-              if (path) {
-                const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-                  targets: this,
-                  y: path[0].y,
-                  x: path[0].x,
-                  duration: 100,
-                  ease: "Linear",
-                  repeat: 0,
-                  yoyo: false,
-                };
-                this.scene.tweens.add(tweenConfig);
-                this.lastMoveTime = time;
+      if (!this.scene.tweens.isTweening(this)) {
+        this.easyStar!.findPath(
+          this.map.worldToTileX(this.x) as number,
+          this.map.worldToTileY(this.y) as number,
+          this.map.worldToTileX(this.player.x) as number,
+          this.map.worldToTileY(this.player.y) as number,
+          (path) => {
+            if (path) {
+              if (path[0] === path[1]) {
+                // sitting on player / collision
+                return;
               }
-              // else console.log("no path found");
-            },
-          );
-          this.easyStar!.calculate();
-        }
+              const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
+              if (!coord) return;
+              if (
+                this.map &&
+                !TileTools.isTileOpenAt(coord.x, coord.y, this.map)
+              ) {
+                return;
+              }
+              const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+                targets: this,
+                y: coord.y,
+                x: coord.x,
+                duration: 100,
+                ease: "Linear",
+                repeat: 0,
+                yoyo: false,
+              };
+              this.scene.tweens.add(tweenConfig);
+              this.lastMoveTime = time;
+            }
+          },
+        );
+        this.easyStar!.calculate();
       }
     }
-    // const th = this.map.tileHeight * this.layer.scaleY;
-    // const tw = this.map.tileWidth * this.layer.scaleX;
-    // const repeatMoveDelay = 160;
-    // if (time > this.lastMoveTime + repeatMoveDelay) {
-    //   if (TileTools.isTileOpenAt(this.x, this.y + th, this.map)) {
-    //     const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-    //       targets: this,
-    //       y: this.player.y + tw,
-    //       x: this.player.x + tw,
-    //       duration: 100,
-    //       ease: "Linear",
-    //       repeat: 0,
-    //       yoyo: false,
-    //       onComplete: () => {
-    //         if (!this.map || !this.layer || !this.player) return;
-    //         this.easyStar!.findPath(
-    //           this.map.worldToTileX(this.x) as number,
-    //           this.map.worldToTileY(this.y) as number,
-    //           this.map.worldToTileX(this.player.x) as number,
-    //           this.map.worldToTileY(this.player.y) as number,
-    //           (path) => {
-    //             if (path) {
-    //               const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-    //                 targets: this,
-    //                 y: path[0].y,
-    //                 x: path[0].x,
-    //                 duration: 100,
-    //                 ease: "Linear",
-    //                 repeat: 0,
-    //                 yoyo: false,
-    //               };
-    //               this.scene.tweens.add(tweenConfig);
-    //             }
-    //             // else console.log("no path found");
-    //           },
-    //         );
-    //         this.easyStar!.calculate();
-    //       },
-    //     };
-    //     this.scene.tweens.add(tweenConfig);
-    //     this.lastMoveTime = time;
-    //   }
-    // }
   }
 
   findPath() {
