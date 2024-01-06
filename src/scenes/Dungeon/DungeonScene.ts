@@ -86,22 +86,6 @@ class DungeonScene extends Scene {
     // Place the player in the first room
     const playerRoom = this.dungeon.rooms[0];
 
-    // const easyStarGrid = (): number[][] => {
-    //   const grid: number[][] = [];
-    //   this.map!.layers[0].data.forEach((row) => {
-    //     const newRow: number[] = [];
-    //     row.forEach((tile) => {
-    //       if (tile.collides) newRow.push(1);
-    //       else newRow.push(0);
-    //     });
-    //     grid.push(newRow);
-    //   });
-    //   return grid;
-    // };
-
-    // this.easystar.setGrid(easyStarGrid());
-    // this.easystar.setAcceptableTiles([0]);
-
     this.playerManager = new PlayerManager(this.map, this, this.layer);
     const player = this.playerManager.create(playerRoom, 1, 1);
     this.enemyManager = new EnemyManager(this.map, this, this.layer, player);
