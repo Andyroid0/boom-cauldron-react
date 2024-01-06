@@ -4,5 +4,6 @@ type MessageServiceType =
   | "toggle-right"
   | "toggle-up"
   | "toggle-down"
-  | "toggle-grab";
+  | "toggle-grab"
+  | "player1-take-damage";
 export default MessageServiceType;

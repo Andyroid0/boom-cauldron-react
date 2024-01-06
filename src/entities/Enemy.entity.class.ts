@@ -10,6 +10,7 @@ import TileTools from "../utils/TileTools";
 interface Enemy extends EntityID, EntityStat, EnemyDeps {}
 class Enemy extends GameObjects.Graphics implements Enemy {
   lastMoveTime = 0;
+  lastAttackTime = 0;
 
   constructor(inj: EnemyInjectable) {
     super(inj.scene);
@@ -37,42 +38,52 @@ class Enemy extends GameObjects.Graphics implements Enemy {
 
   update(time: number) {
     if (!this.map || !this.layer || !this.player) return;
+    const thisX = this.map.worldToTileX(this.x) as number;
+    const thisY = this.map.worldToTileY(this.y) as number;
+    const playerX = this.map.worldToTileX(this.player.x) as number;
+    const playerY = this.map.worldToTileY(this.player.y) as number;
+    const attackDelay = 400;
+
+    if (
+      time > this.lastAttackTime + attackDelay &&
+      thisX === playerX &&
+      thisY === playerY
+    ) {
+      this.attack();
+      this.lastAttackTime = time;
+    }
+
     const repeatMoveDelay = 600;
     if (time > this.lastMoveTime + repeatMoveDelay) {
       if (!this.scene.tweens.isTweening(this)) {
-        this.easyStar!.findPath(
-          this.map.worldToTileX(this.x) as number,
-          this.map.worldToTileY(this.y) as number,
-          this.map.worldToTileX(this.player.x) as number,
-          this.map.worldToTileY(this.player.y) as number,
-          (path) => {
-            if (path) {
-              if (path[0] === path[1]) {
-                // sitting on player / collision
-                return;
-              }
-              const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
-              if (!coord) return;
-              if (
-                this.map &&
-                !TileTools.isTileOpenAt(coord.x, coord.y, this.map)
-              ) {
-                return;
-              }
-              const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-                targets: this,
-                y: coord.y,
-                x: coord.x,
-                duration: 100,
-                ease: "Linear",
-                repeat: 0,
-                yoyo: false,
-              };
-              this.scene.tweens.add(tweenConfig);
-              this.lastMoveTime = time;
+        this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
+          if (path) {
+            if (path[0] === path[1]) {
+              // sitting on player / collision
+              // this.attack();
+              return;
             }
-          },
-        );
+            const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
+            if (!coord) return;
+            if (
+              this.map &&
+              !TileTools.isTileOpenAt(coord.x, coord.y, this.map)
+            ) {
+              return;
+            }
+            const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+              targets: this,
+              y: coord.y,
+              x: coord.x,
+              duration: 100,
+              ease: "Linear",
+              repeat: 0,
+              yoyo: false,
+            };
+            this.scene.tweens.add(tweenConfig);
+            this.lastMoveTime = time;
+          }
+        });
         this.easyStar!.calculate();
       }
     }

@@ -9,6 +9,7 @@ import useStateStore from "../context/useStateStore";
 interface Player extends EntityID, EntityStat, PlayerDeps {}
 class Player extends GameObjects.Graphics implements Player {
   lastMoveTime = 0;
+  health = 10;
 
   constructor(
     map: Tilemaps.Tilemap,
@@ -28,15 +29,18 @@ class Player extends GameObjects.Graphics implements Player {
       this.map.tileHeight * this.layer.scaleY,
     );
     scene.add.existing(this);
+    useStateStore.getState().setPlayerHealth(this.health);
   }
 
-  public attack() {
-    const damage = 10;
+  public attack(dmg = 1) {
     // check area to see what the tile contains
     // enemy.takeDamage(damage);
   }
 
-  public takeDamage() {}
+  public takeDamage(dmg = 1) {
+    this.health -= dmg;
+    useStateStore.getState().setPlayerHealth(this.health);
+  }
 
   public update(time: number) {
     if (!this.map || !this.layer) return;

@@ -6,6 +6,10 @@ export default class MessageService {
     window.postMessage(msg);
   }
 
+  public static sendWithAmount(msg: MessageServiceType, amount: number) {
+    window.postMessage({ type: msg, value: amount });
+  }
+
   constructor(context: InputState) {
     const handleEvent = (event: MessageEvent) => {
       switch (event.data as MessageServiceType) {
