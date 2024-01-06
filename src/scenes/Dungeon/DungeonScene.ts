@@ -9,11 +9,13 @@ import {
 } from "phaser";
 import * as dat from "dat.gui";
 import EasyStar from "easystarjs";
-import EnemyManager from "../../managers/EnemyManager";
-
+import PlayerManager from "../../managers/PlayerManager";
 import useStateStore from "../../context/useStateStore";
-
-import { TILES } from "./tiles.data";
+import InputState from "../../types/InputState.class";
+import MessageService from "../../services/MessageService";
+import InputManager from "../../managers/InputManager";
+import EnemyManager from "../../managers/EnemyManager";
+import MapManager from "../../managers/MapManager";
 
 const { debug, showCamGUI } = useStateStore.getState();
 
@@ -30,6 +32,12 @@ class DungeonScene extends Scene {
   // eslint-disable-next-line @babel/new-cap
   easystar: EasyStar.js = new EasyStar.js();
   paused: boolean = useStateStore.getState().paused;
+  enemyManager: EnemyManager | undefined;
+  playerManager: PlayerManager | undefined;
+  messageService!: MessageService;
+  state: InputState = new InputState();
+  inputService!: InputManager;
+  mapManager: MapManager | undefined;
 
   constructor() {
     super("dungeon");
@@ -58,29 +66,10 @@ class DungeonScene extends Scene {
         height: { min: 7, max: 20, onlyOdd: true },
       },
     });
-
-    // Creating a blank tilemap with dimensions matching the dungeon
-    const tileMapConfig: Types.Tilemaps.TilemapConfig = {
-      tileWidth: 16,
-      tileHeight: 16,
-      width: this.dungeon.width,
-      height: this.dungeon.height,
-    };
-    this.map = this.make.tilemap(tileMapConfig);
-
-    const tileset: Tilemaps.Tileset = this.map.addTilesetImage(
-      "tiles",
-      "tiles",
-      16,
-      16,
-      0,
-      0,
-      0,
-      { x: 0, y: 0 },
-    ) as Tilemaps.Tileset;
-
-    this.layer = this.map.createBlankLayer("Layer 1", tileset);
-    // this.layer2 = this.map.createBlankLayer("Layer 2", tileset);
+    this.mapManager = new MapManager();
+    this.map = this.mapManager.createBlankTileMap(this.dungeon, this);
+    const tileset: Tilemaps.Tileset = this.mapManager.createTileset(this.map);
+    this.layer = this.mapManager.createBlankLayer(tileset, this.map);
 
     if (!this.layer) {
       console.error("layer is null or undefined.");
@@ -94,86 +83,12 @@ class DungeonScene extends Scene {
     // Fill with black tiles
     this.layer.fill(48);
 
-    // Use the array of rooms generated to place tiles in the map
-    this.dungeon.rooms.forEach((room) => {
-      if (!this.map || !this.layer) return;
-      const x = room.x;
-      const y = room.y;
-      const width = room.width;
-      const height = room.height;
-      const cx = Math.floor(x + width / 2);
-      const cy = Math.floor(y + height / 2);
-      const left = x;
-      const right = x + (width - 1);
-      const top = y;
-      const bottom = y + (height - 1);
-
-      // Fill the floor with mostly clean tiles, but occasionally place a dirty tile
-      // See "Weighted Randomize" example for more information on how to use weightedRandomize.
-      this.map.weightedRandomize(TILES.FLOOR, x, y, width, height);
-
-      // Place the room corners tiles
-      this.map.putTileAt(TILES.TOP_LEFT_WALL, left, top);
-      this.map.putTileAt(TILES.TOP_RIGHT_WALL, right, top);
-      this.map.putTileAt(TILES.BOTTOM_RIGHT_WALL, right, bottom);
-      this.map.putTileAt(TILES.BOTTOM_LEFT_WALL, left, bottom);
-
-      // Fill the walls with mostly clean tiles, but occasionally place a dirty tile
-      this.map.weightedRandomize(TILES.TOP_WALL, left + 1, top, width - 2, 1);
-      this.map.weightedRandomize(
-        TILES.BOTTOM_WALL,
-        left + 1,
-        bottom,
-        width - 2,
-        1,
-      );
-      this.map.weightedRandomize(TILES.LEFT_WALL, left, top + 1, 1, height - 2);
-      this.map.weightedRandomize(
-        TILES.RIGHT_WALL,
-        right,
-        top + 1,
-        1,
-        height - 2,
-      );
-
-      // Dungeons have rooms that are connected with doors. Each door has an x & y relative to the rooms location
-      const doors = room.getDoorLocations();
-
-      // eslint-disable-next-line @typescript-eslint/prefer-for-of
-      for (let i = 0; i < doors.length; i++) {
-        this.map.putTileAt(0, x + doors[i].x, y + doors[i].y);
-      }
-
-      // Place some random stuff in rooms occasionally
-      const rand = Math.random();
-      if (rand <= 0.25) {
-        // Chest
-        this.layer2?.putTileAt(89, cx, cy);
-      } else if (rand <= 0.3) {
-        // Stairs
-        this.layer2?.putTileAt(85, cx, cy);
-      }
-      // else if (rand <= 0.4) {
-      //   // Trap door
-      //   this.layer.putTileAt(167, cx, cy);
-      // }
-      // else if (rand <= 0.6) {
-      //   if (room.height >= 9) {
-      //     // We have room for 4 towers
-      //     this.layer.putTilesAt([[186], [205]], cx - 1, cy + 1);
-
-      //     this.layer.putTilesAt([[186], [205]], cx + 1, cy + 1);
-
-      //     this.layer.putTilesAt([[186], [205]], cx - 1, cy - 2);
-
-      //     this.layer.putTilesAt([[186], [205]], cx + 1, cy - 2);
-      //   } else {
-      //     this.layer.putTilesAt([[186], [205]], cx - 1, cy - 1);
-
-      //     this.layer.putTilesAt([[186], [205]], cx + 1, cy - 1);
-      //   }
-      // }
-    }, this);
+    this.mapManager.populateTilesPerRoom(
+      this.dungeon,
+      this.map,
+      this.layer,
+      this,
+    );
 
     const excludeFromCollision = [0, 48, 49];
     this.layer.setCollisionByExclusion(excludeFromCollision);
