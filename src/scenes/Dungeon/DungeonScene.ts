@@ -41,6 +41,9 @@ class DungeonScene extends Scene {
 
   preload() {
     this.load.image("tiles", "img/tilemap_packed.png");
+    this.load.image("projectile", "img/projectile_plc.png");
+    this.load.image("hero", "img/haluski_img2.png");
+    this.load.image("enemy", "img/necro_plc.png");
   }
 
   create() {
@@ -83,13 +86,24 @@ class DungeonScene extends Scene {
         tile.alpha = 0;
       });
     }
-
     // Place the player in the first room
     const playerRoom = this.dungeon.rooms[0];
 
-    this.playerManager = new PlayerManager(this.map, this, this.layer);
+    this.playerManager = new PlayerManager(
+      this.map,
+      this,
+      this.layer,
+      this.matter.world,
+    );
     const player = this.playerManager.create(playerRoom, 1, 1);
-    this.enemyManager = new EnemyManager(this.map, this, this.layer, player);
+    if (!player) throw new Error("Failed to create player.");
+    this.enemyManager = new EnemyManager(
+      this.map,
+      this,
+      this.layer,
+      player,
+      this.matter.world,
+    );
 
     this.enemyManager.create(playerRoom, 3, 3, "lab-bot");
 

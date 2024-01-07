@@ -1,4 +1,4 @@
-import { GameObjects, Types } from "phaser";
+import { Physics, Types } from "phaser";
 
 import EntityID from "../types/EntityID.properties.class";
 import EntityStat from "../types/EntityStat.properties.class";
@@ -6,34 +6,57 @@ import EnemyInjectable from "../types/EnemyInj.injectables.interface";
 import EnemyDeps from "../types/EnemyDeps.dependencies.class";
 import EntityService from "../services/EntityService";
 import TileTools from "../utils/TileTools";
+import MessageService from "../services/MessageService";
 
 interface Enemy extends EntityID, EntityStat, EnemyDeps {}
-class Enemy extends GameObjects.Graphics implements Enemy {
+class Enemy extends Physics.Matter.Sprite implements Enemy {
   lastMoveTime = 0;
   lastAttackTime = 0;
+  health = 0;
 
   constructor(inj: EnemyInjectable) {
-    super(inj.scene);
-    this.id = EntityService.generateID();
+    const label = EntityService.generateID();
+    const bodyOptions: Types.Physics.Matter.MatterBodyConfig = {
+      render: { sprite: { xOffset: -0.2, yOffset: -0.2 } },
+      // scale: { x: 0.5, y: 0.5 },
+      label,
+    };
+    super(inj.world, 0, 0, "enemy", 0, bodyOptions);
+    this.id = label;
     this.multiplier = inj.multiplier;
     this.player = inj.dependencies.player;
     this.map = inj.dependencies.map;
     this.easyStar = inj.dependencies.easyStar;
     this.scene = inj.scene;
     this.layer = inj.dependencies.layer;
-
-    this.fillStyle(11141120, 1);
-    this.fillRect(
-      0,
-      0,
-      this.map!.tileWidth * this.layer!.scaleX,
-      this.map!.tileHeight * this.layer!.scaleY,
-    );
+    this.health = inj.health;
+    // this.fillStyle(11141120, 1);
+    // this.fillRect(
+    //   0,
+    //   0,
+    //   this.map!.tileWidth * this.layer!.scaleX,
+    //   this.map!.tileHeight * this.layer!.scaleY,
+    // );
     this.scene.add.existing(this);
   }
 
-  attack() {
-    this.player?.takeDamage();
+  attack(dmg: number) {
+    this.player?.takeDamage(dmg);
+  }
+
+  takeDamage(dmg: number) {
+    this.health -= dmg;
+    if (this.health <= 0) {
+      this.handleDeath();
+    }
+  }
+
+  handleDeath() {
+    // play death animation
+    // then
+    MessageService.sendWithID({ type: "enemy-death", id: this.id as string });
+    // enemyManager.pool.pop(this)   ??? something like that.
+    this.destroy(true);
   }
 
   update(time: number) {
@@ -49,7 +72,7 @@ class Enemy extends GameObjects.Graphics implements Enemy {
       thisX === playerX &&
       thisY === playerY
     ) {
-      this.attack();
+      this.attack(1);
       this.lastAttackTime = time;
     }
 

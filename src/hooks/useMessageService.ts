@@ -45,6 +45,8 @@ const useMessageService = () => {
         case "toggle-grab":
           toggleGrab();
           break;
+        default:
+          break;
       }
     };
     window.addEventListener("message", handleEvent);

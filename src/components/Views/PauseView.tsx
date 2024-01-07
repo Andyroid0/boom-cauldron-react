@@ -10,15 +10,14 @@ const PauseView: FC<PauseViewProps> = (props) => {
   // eslint-disable-next-line no-empty-pattern
   const {} = props;
 
-  const { paused, pause } = useStateStore(
+  const { paused } = useStateStore(
     useShallow((state) => ({
       paused: state.paused,
-      pause: state.togglePaused,
     })),
   );
 
   const handleClose = () => {
-    pause();
+    window.postMessage("toggle-pause");
   };
 
   const _title = "Pause Menu";

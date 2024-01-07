@@ -14,10 +14,13 @@ const config: Phaser.Types.Core.GameConfig = {
     height: window.innerHeight,
   },
   physics: {
-    default: "arcade",
-    arcade: {
+    default: "matter",
+    matter: {
       gravity: { y: 0 },
-      debug: true,
+      debug: {
+        showBody: false,
+        showStaticBody: false,
+      },
     },
   },
   scene: [Bootstrap, Game, DungeonScene],

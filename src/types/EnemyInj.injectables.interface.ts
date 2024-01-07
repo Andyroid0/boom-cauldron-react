@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { Physics, Scene } from "phaser";
 
 import EnemyDeps from "./EnemyDeps.dependencies.class";
 
@@ -7,4 +7,6 @@ export default interface EnemyInj {
   multiplier: number;
   scene: Scene;
   dependencies: EnemyDeps;
+  world: Physics.Matter.World;
+  health: number;
 }
