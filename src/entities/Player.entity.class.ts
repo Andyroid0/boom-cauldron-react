@@ -5,6 +5,7 @@ import EntityStat from "../types/EntityStat.properties.class";
 import PlayerDeps from "../types/PlayerDeps.dependencies.class";
 import TileTools from "../utils/TileTools";
 import useStateStore from "../context/useStateStore";
+import GameOverScreen from "../screens/GameOverScreen";
 
 interface Player extends EntityID, EntityStat, PlayerDeps {}
 class Player extends GameObjects.Graphics implements Player {
@@ -40,6 +41,7 @@ class Player extends GameObjects.Graphics implements Player {
   public takeDamage(dmg = 1) {
     this.health -= dmg;
     useStateStore.getState().setPlayerHealth(this.health);
+  
   }
 
   public update(time: number) {
