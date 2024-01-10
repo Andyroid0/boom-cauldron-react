@@ -4,7 +4,7 @@ import useNavService from "../hooks/useNavService";
 import Background from "../components/Background";
 
 const GameOverScreen = () => {
-  const _start = "Game Over";
+  const _gameOver = "Game Over";
   const goTo = useNavService();
 
   const handleClick = () => {
@@ -24,7 +24,7 @@ const GameOverScreen = () => {
           }}
           textAlign="center"
         >
-          {_start}
+          {_gameOver}
         </Typography>
       </Button>
     </Background>
