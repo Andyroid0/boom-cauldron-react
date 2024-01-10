@@ -77,7 +77,7 @@ class MapManager {
       const doors = room.getDoorLocations();
       // eslint-disable-next-line @typescript-eslint/prefer-for-of
       for (let i = 0; i < doors.length; i++) {
-        map.putTileAt(0, x + doors[i].x, y + doors[i].y);
+        map.putTileAt(48, x + doors[i].x, y + doors[i].y);
       }
       // Place some random stuff in rooms occasionally
       const rand = Math.random();
@@ -109,6 +109,19 @@ class MapManager {
       //   }
       // }
     }, scene);
+
+    const collisionTiles = [
+      TILES.BOTTOM_LEFT_WALL,
+      TILES.BOTTOM_RIGHT_WALL,
+      TILES.BOTTOM_WALL[0].index,
+      TILES.LEFT_WALL[0].index,
+      TILES.RIGHT_WALL[0].index,
+      TILES.TOP_LEFT_WALL,
+      TILES.TOP_RIGHT_WALL,
+      TILES.TOP_WALL[0].index,
+    ];
+    layer.setCollision(collisionTiles);
+    scene.matter.world.convertTilemapLayer(layer);
   }
 }
 

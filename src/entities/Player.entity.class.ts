@@ -28,6 +28,7 @@ class Player extends Physics.Matter.Sprite implements Player {
       label,
     };
     super(world, 0, 0, "hero", 0, bodyOptions);
+    this.setFixedRotation();
     this.id = label;
     this.map = map;
     this.scene = scene;

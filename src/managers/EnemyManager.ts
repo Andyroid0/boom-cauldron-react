@@ -49,15 +49,12 @@ class EnemyManager implements EnemyManager {
     const handleProjectileEvent = (
       event: MessageEvent<MessageServiceWithOrigin & MessageServiceWithID>,
     ) => {
-      console.log(event.data);
       if (
         event.data.type === "projectile-collision"
         // event.data.origin === "player"
       ) {
-        console.log("Amount: ", event.data.amount, " id: ", event.data.id);
         const enemy = this.pool.find((enemy) => enemy.id === event.data.id);
         enemy?.takeDamage(event.data.amount);
-        console.log("enemy health: ", enemy?.health);
       } else if (event.data.type === "enemy-death") {
         const index = this.pool.findIndex(
           (enemy) => enemy.id === event.data.id,

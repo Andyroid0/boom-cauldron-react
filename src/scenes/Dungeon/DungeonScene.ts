@@ -105,7 +105,7 @@ class DungeonScene extends Scene {
       this.matter.world,
     );
 
-    this.enemyManager.create(playerRoom, 3, 3, "lab-bot");
+    this.enemyManager.create(playerRoom, 4, 4, "lab-bot");
 
     if (!debug) {
       // Make the starting room visible
@@ -115,14 +115,12 @@ class DungeonScene extends Scene {
     // Scroll to the player
     this.cam = this.cameras.main;
 
-    this.cam.setBounds(
-      0,
-      0,
-      this.layer.width * this.layer.scaleX,
-      this.layer.height * this.layer.scaleY,
-    );
-    this.cam.scrollX = this.playerManager.pool[0].x - this.cam.width * 0.5;
-    this.cam.scrollY = this.playerManager.pool[0].y - this.cam.height * 0.5;
+    // this.cam.setBounds(
+    //   0,
+    //   0,
+    //   this.layer.width * this.layer.scaleX,
+    //   this.layer.height * this.layer.scaleY,
+    // );
 
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
@@ -154,7 +152,7 @@ class DungeonScene extends Scene {
       gui.add(this.layer, "tilesTotal").listen();
     }
 
-    this.cam.startFollow(this.playerManager.player1(), true, 0.1, 0.1);
+    this.cam.startFollow(this.playerManager.player1(), false);
   }
 
   update(time: number, delta: number) {

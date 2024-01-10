@@ -40,25 +40,33 @@ class Projectile extends Physics.Matter.Sprite {
     );
     this.origin = origin;
     this.damage = damage;
-    console.log("Projectile damage at creation: ", this.damage);
     this.startData = data;
     scene.add.existing(this);
     world.add(this);
     this.setScale(6);
     this.setVelocity(this.startData.velocity.x, this.startData.velocity.y);
     this.setFriction(0, 0);
-    this.setOnCollide(this.handleCollide);
+    this.setOnCollide((data: Types.Physics.Matter.MatterCollisionData) =>
+      this.handleCollide(data, this.damage, this.origin, this),
+    );
     new DurationDestroyer(scene, this, duration);
   }
 
-  handleCollide(data: Types.Physics.Matter.MatterCollisionData) {
+  handleCollide(
+    data: Types.Physics.Matter.MatterCollisionData,
+    amount: number,
+    origin: MessageServiceOrigin,
+    context: Projectile,
+  ) {
     if (data.bodyA.label !== "wall" && data.bodyA.label !== "item") {
       MessageService.sendWithOriginIDAmount({
         type: "projectile-collision",
-        origin: "player",
+        origin,
         id: data.bodyA.label,
-        amount: 1,
+        amount,
       });
+      // play projectile collision animation here.
+      context.destroy();
     }
   }
 }

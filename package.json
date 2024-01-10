@@ -17,6 +17,7 @@
     "@types/node": "^16.18.68",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "color": "^4.2.3",
     "dat.gui": "^0.7.9",
     "easystarjs": "^0.4.4",
     "eslint": "^8.56.0",
@@ -60,6 +61,7 @@
     "@babel/eslint-plugin": "^7.23.5",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@shopify/eslint-plugin": "^44.0.0",
+    "@types/color": "^3.0.6",
     "eslint-plugin-unused-imports": "^3.0.0"
   }
 }
