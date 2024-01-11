@@ -14,14 +14,18 @@ const config: Phaser.Types.Core.GameConfig = {
     height: window.innerHeight,
   },
   physics: {
-    default: "arcade",
-    arcade: {
+    default: "matter",
+    matter: {
       gravity: { y: 0 },
-      debug: true,
+      debug: {
+        showBody: true,
+        showStaticBody: true,
+      },
     },
   },
   scene: [Bootstrap, Game, DungeonScene],
   pixelArt: true,
+  roundPixels: true,
 };
 // eslint-disable-next-line import/no-anonymous-default-export
 export default new Phaser.Game(config);

@@ -41,6 +41,9 @@ class DungeonScene extends Scene {
 
   preload() {
     this.load.image("tiles", "img/tilemap_packed.png");
+    this.load.image("projectile", "img/projectile_plc.png");
+    this.load.image("hero", "img/haluski_img2.png");
+    this.load.image("enemy", "img/necro_plc.png");
   }
 
   create() {
@@ -83,15 +86,26 @@ class DungeonScene extends Scene {
         tile.alpha = 0;
       });
     }
-
     // Place the player in the first room
     const playerRoom = this.dungeon.rooms[0];
 
-    this.playerManager = new PlayerManager(this.map, this, this.layer);
+    this.playerManager = new PlayerManager(
+      this.map,
+      this,
+      this.layer,
+      this.matter.world,
+    );
     const player = this.playerManager.create(playerRoom, 1, 1);
-    this.enemyManager = new EnemyManager(this.map, this, this.layer, player);
+    if (!player) throw new Error("Failed to create player.");
+    this.enemyManager = new EnemyManager(
+      this.map,
+      this,
+      this.layer,
+      player,
+      this.matter.world,
+    );
 
-    this.enemyManager.create(playerRoom, 3, 3, "lab-bot");
+    this.enemyManager.create(playerRoom, 4, 4, "lab-bot");
 
     if (!debug) {
       // Make the starting room visible
@@ -101,14 +115,12 @@ class DungeonScene extends Scene {
     // Scroll to the player
     this.cam = this.cameras.main;
 
-    this.cam.setBounds(
-      0,
-      0,
-      this.layer.width * this.layer.scaleX,
-      this.layer.height * this.layer.scaleY,
-    );
-    this.cam.scrollX = this.playerManager.pool[0].x - this.cam.width * 0.5;
-    this.cam.scrollY = this.playerManager.pool[0].y - this.cam.height * 0.5;
+    // this.cam.setBounds(
+    //   0,
+    //   0,
+    //   this.layer.width * this.layer.scaleX,
+    //   this.layer.height * this.layer.scaleY,
+    // );
 
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
@@ -140,7 +152,7 @@ class DungeonScene extends Scene {
       gui.add(this.layer, "tilesTotal").listen();
     }
 
-    this.cam.startFollow(this.playerManager.player1(), true, 0.1, 0.1);
+    this.cam.startFollow(this.playerManager.player1(), true, 0.05, 0.05);
   }
 
   update(time: number, delta: number) {

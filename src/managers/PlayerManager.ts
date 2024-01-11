@@ -1,27 +1,29 @@
-import { Scene, Tilemaps } from "phaser";
+import { Physics, Scene, Tilemaps } from "phaser";
 import { Room } from "@mikewesthad/dungeon";
 
 import Player from "../entities/Player.entity.class";
+import PlayerDeps from "../types/PlayerDeps.dependencies.class";
 
-interface PlayerManager {}
+interface PlayerManager extends PlayerDeps {}
 class PlayerManager implements PlayerManager {
   pool: Player[] = [];
-  map!: Tilemaps.Tilemap;
   scene!: Scene;
-  layer!: Tilemaps.TilemapLayer;
 
   constructor(
     map: Tilemaps.Tilemap,
     scene: Scene,
     layer: Tilemaps.TilemapLayer,
+    world: Physics.Matter.World,
   ) {
     this.scene = scene;
     this.map = map;
     this.layer = layer;
+    this.world = world;
   }
 
   create(room: Room, coordX: number, coordY: number) {
-    const player = new Player(this.map, this.scene, this.layer);
+    if (!this.map || !this.layer || !this.world) return;
+    const player = new Player(this.map, this.scene, this.layer, this.world);
     this.pool.push(player);
     player.x = this.map.tileToWorldX(room.x + coordX) as number;
     player.y = this.map.tileToWorldY(room.y + coordY) as number;
