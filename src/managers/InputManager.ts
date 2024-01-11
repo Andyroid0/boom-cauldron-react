@@ -1,6 +1,5 @@
 import { Input, Scene, Types } from "phaser";
 
-import useStateStore from "../context/useStateStore";
 import MessageService from "../services/MessageService";
 
 class InputManager {
@@ -10,6 +9,16 @@ class InputManager {
   fireDown: Input.Keyboard.Key;
   fireLeft: Input.Keyboard.Key;
   fireRight: Input.Keyboard.Key;
+
+  left = false;
+  right = false;
+  up = false;
+  down = false;
+
+  upLeft = false;
+  upRight = false;
+  downLeft = false;
+  downRight = false;
 
   constructor(scene: Scene) {
     this.scene = scene;
@@ -34,22 +43,22 @@ class InputManager {
   update() {
     if (!this.cursors || !this.scene) return;
     // interact with using the Message Service.
-    if (this.cursors.left.isDown && !useStateStore.getState().left) {
-      MessageService.send("toggle-left");
-    } else if (this.cursors.right.isDown && !useStateStore.getState().right) {
-      MessageService.send("toggle-right");
-    } else if (this.cursors.up.isDown && !useStateStore.getState().up) {
-      MessageService.send("toggle-up");
-    } else if (this.cursors.down.isDown && !useStateStore.getState().down) {
-      MessageService.send("toggle-down");
-    } else if (this.cursors.left.isUp && useStateStore.getState().left) {
-      MessageService.send("toggle-left");
-    } else if (this.cursors.right.isUp && useStateStore.getState().right) {
-      MessageService.send("toggle-right");
-    } else if (this.cursors.up.isUp && useStateStore.getState().up) {
-      MessageService.send("toggle-up");
-    } else if (this.cursors.down.isUp && useStateStore.getState().down) {
-      MessageService.send("toggle-down");
+    if (this.cursors.left.isDown && !this.left) {
+      this.left = true;
+    } else if (this.cursors.right.isDown && !this.right) {
+      this.right = true;
+    } else if (this.cursors.up.isDown && !this.up) {
+      this.up = true;
+    } else if (this.cursors.down.isDown && !this.down) {
+      this.down = true;
+    } else if (this.cursors.left.isUp && this.left) {
+      this.left = false;
+    } else if (this.cursors.right.isUp && this.right) {
+      this.right = false;
+    } else if (this.cursors.up.isUp && this.up) {
+      this.up = false;
+    } else if (this.cursors.down.isUp && this.down) {
+      this.down = false;
     }
 
     if (Input.Keyboard.JustDown(this.fireUp)) {

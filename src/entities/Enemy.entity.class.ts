@@ -74,6 +74,8 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   }
 
   update(time: number) {
+    this.x = Math.round(this.x);
+    this.y = Math.round(this.y);
     if (!this.map || !this.layer || !this.player) return;
 
     // const attackDelay = 400;
@@ -116,39 +118,6 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
       this.easyStar!.calculate();
       this.lastMoveTime = time;
     }
-
-    // if (!this.scene.tweens.isTweening(this)) {
-    //   this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-    //     if (path) {
-    //       if (path[0] === path[1]) {
-    //         // sitting on player / collision
-    //         // this.attack();
-    //         return;
-    //       }
-    //       const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
-    //       if (!coord) return;
-    //       if (
-    //         this.map &&
-    //         !TileTools.isTileOpenAt(coord.x, coord.y, this.map)
-    //       ) {
-    //         return;
-    //       }
-    //       const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-    //         targets: this,
-    //         y: coord.y,
-    //         x: coord.x,
-    //         duration: 100,
-    //         ease: "Linear",
-    //         repeat: 0,
-    //         yoyo: false,
-    //       };
-    //       this.scene.tweens.add(tweenConfig);
-    //       this.lastMoveTime = time;
-    //     }
-    //   });
-    //   this.easyStar!.calculate();
-    // }
-    // }
   }
 
   findPath() {

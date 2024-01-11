@@ -31,7 +31,7 @@ class DungeonScene extends Scene {
   playerManager: PlayerManager | undefined;
   messageService!: MessageService;
   state: InputState = new InputState();
-  inputService!: InputManager;
+  inputManager!: InputManager;
   mapManager: MapManager | undefined;
 
   constructor() {
@@ -47,7 +47,7 @@ class DungeonScene extends Scene {
   }
 
   create() {
-    this.inputService = new InputManager(this);
+    this.inputManager = new InputManager(this);
 
     //  40,000 tile test
     this.dungeon = new Dungeon({
@@ -94,6 +94,7 @@ class DungeonScene extends Scene {
       this,
       this.layer,
       this.matter.world,
+      this.inputManager,
     );
     const player = this.playerManager.create(playerRoom, 1, 1);
     if (!player) throw new Error("Failed to create player.");
@@ -152,13 +153,16 @@ class DungeonScene extends Scene {
       gui.add(this.layer, "tilesTotal").listen();
     }
 
-    this.cam.startFollow(this.playerManager.player1(), true, 0.05, 0.05);
+    const player1 = this.playerManager.player1();
+    player1.x = Math.round(player1.x);
+    player1.y = Math.round(player1.y);
+    this.cam.startFollow(player1, true);
   }
 
   update(time: number, delta: number) {
     if (this.state.paused) return;
 
-    this.inputService.update();
+    this.inputManager.update();
     // Maybe set a loading screen here?
     if (!this.map || !this.dungeon || !this.cam) return;
 
