@@ -21,8 +21,8 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   constructor(inj: EnemyInjectable) {
     const label = EntityService.generateID();
     const bodyOptions: Types.Physics.Matter.MatterBodyConfig = {
-      render: { sprite: { xOffset: -0.2, yOffset: -0.2 } },
       label,
+      shape: "circle",
     };
     super(inj.world, 0, 0, "enemy", 0, bodyOptions);
     this.setFixedRotation();

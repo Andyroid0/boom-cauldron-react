@@ -2,7 +2,7 @@ import { Math, Physics, Scene, Tilemaps, Types } from "phaser";
 
 import EntityID from "../types/EntityID.properties.class";
 import EntityStat from "../types/EntityStat.properties.class";
-import TileTools from "../utils/TileTools";
+// import TileTools from "../utils/TileTools";
 import useStateStore from "../context/useStateStore";
 import MessageServiceWithAmount from "../types/MessageServiceWithAmount.interface";
 import EntityService from "../services/EntityService";
@@ -15,6 +15,7 @@ class Player extends Physics.Matter.Sprite implements Player {
   health = 10;
   map: Tilemaps.Tilemap | undefined;
   layer: Tilemaps.TilemapLayer | undefined;
+  speed = 5;
 
   constructor(
     map: Tilemaps.Tilemap,
@@ -24,8 +25,8 @@ class Player extends Physics.Matter.Sprite implements Player {
   ) {
     const label = EntityService.generateID();
     const bodyOptions: Types.Physics.Matter.MatterBodyConfig = {
-      render: { sprite: { xOffset: -0.2, yOffset: -0.2 } },
       label,
+      shape: "circle",
     };
     super(world, 0, 0, "hero", 0, bodyOptions);
     this.setFixedRotation();
@@ -118,60 +119,62 @@ class Player extends Physics.Matter.Sprite implements Player {
 
     if (time > this.lastMoveTime + repeatMoveDelay) {
       if (useStateStore.getState().down) {
-        if (TileTools.isTileOpenAt(this.x, this.y + th, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this,
-            y: this.y + th,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.scene.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
+        this.setVelocityY(this.speed);
+        // if (TileTools.isTileOpenAt(this.x, this.y + th, this.map)) {
+        //   const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+        //     targets: this,
+        //     y: this.y + th,
+        //     duration: 100,
+        //     ease: "Linear",
+        //     repeat: 0,
+        //     yoyo: false,
+        //   };
+        //   this.scene.tweens.add(tweenConfig);
+        //   this.lastMoveTime = time;
+        // }
       } else if (useStateStore.getState().up) {
-        if (TileTools.isTileOpenAt(this.x, this.y - th, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this,
-            y: this.y - th,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.scene.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
-      }
-
-      if (useStateStore.getState().left) {
-        if (TileTools.isTileOpenAt(this.x - tw, this.y, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this,
-            x: this.x - tw,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.scene.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
+        this.setVelocityY(-this.speed);
+        // if (TileTools.isTileOpenAt(this.x, this.y - th, this.map)) {
+        //   const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+        //     targets: this,
+        //     y: this.y - th,
+        //     duration: 100,
+        //     ease: "Linear",
+        //     repeat: 0,
+        //     yoyo: false,
+        //   };
+        //   this.scene.tweens.add(tweenConfig);
+        //   this.lastMoveTime = time;
+        // }
+      } else if (useStateStore.getState().left) {
+        this.setVelocityX(-this.speed);
+        // if (TileTools.isTileOpenAt(this.x - tw, this.y, this.map)) {
+        //   const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+        //     targets: this,
+        //     x: this.x - tw,
+        //     duration: 100,
+        //     ease: "Linear",
+        //     repeat: 0,
+        //     yoyo: false,
+        //   };
+        //   this.scene.tweens.add(tweenConfig);
+        //   this.lastMoveTime = time;
+        // }
       } else if (useStateStore.getState().right) {
-        if (TileTools.isTileOpenAt(this.x + tw, this.y, this.map)) {
-          const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-            targets: this,
-            x: this.x + tw,
-            duration: 100,
-            ease: "Linear",
-            repeat: 0,
-            yoyo: false,
-          };
-          this.scene.tweens.add(tweenConfig);
-          this.lastMoveTime = time;
-        }
-      }
+        this.setVelocityX(this.speed);
+        // if (TileTools.isTileOpenAt(this.x + tw, this.y, this.map)) {
+        //   const tweenConfig: Types.Tweens.TweenBuilderConfig = {
+        //     targets: this,
+        //     x: this.x + tw,
+        //     duration: 100,
+        //     ease: "Linear",
+        //     repeat: 0,
+        //     yoyo: false,
+        //   };
+        //   this.scene.tweens.add(tweenConfig);
+        //   this.lastMoveTime = time;
+        // }
+      } else this.setVelocity(0, 0);
     }
   }
 }

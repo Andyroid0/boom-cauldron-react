@@ -152,7 +152,7 @@ class DungeonScene extends Scene {
       gui.add(this.layer, "tilesTotal").listen();
     }
 
-    this.cam.startFollow(this.playerManager.player1(), false);
+    this.cam.startFollow(this.playerManager.player1(), true, 0.05, 0.05);
   }
 
   update(time: number, delta: number) {
