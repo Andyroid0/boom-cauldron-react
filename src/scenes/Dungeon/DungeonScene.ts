@@ -17,7 +17,6 @@ class DungeonScene extends Scene {
   activeRoom: Room | null = null;
   dungeon: Dungeon | null = null;
   map: Tilemaps.Tilemap | null = null;
-  player: GameObjects.Graphics | null = null;
   enemy: GameObjects.Graphics | null = null;
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
   cam: Cameras.Scene2D.Camera | null = null;
@@ -157,7 +156,18 @@ class DungeonScene extends Scene {
 
     this.inputManager.update();
     // Maybe set a loading screen here?
-    if (!this.map || !this.dungeon || !this.cam) return;
+    if (!this.playerManager?.pool.length) {
+      // GAME OVER
+      MessageService.navigateScreen("/game-over");
+      this.game.destroy(true);
+    }
+    if (
+      !this.map ||
+      !this.dungeon ||
+      !this.cam ||
+      !this.playerManager?.pool.length
+    )
+      return;
 
     this.playerManager?.pool.forEach((player) => {
       player.update(time);

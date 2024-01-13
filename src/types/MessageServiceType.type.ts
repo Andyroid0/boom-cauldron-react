@@ -14,6 +14,7 @@ type MessageServiceType =
   | "enemy-death"
   | "enemy-collision"
   | "enemy-attack"
-  | "player-death";
+  | "player-death"
+  | "navigate-screen";
 
 export default MessageServiceType;

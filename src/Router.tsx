@@ -9,6 +9,7 @@ import LoadingScreen from "./screens/LoadingScreen";
 
 const GamePlay = lazy(() => import("./screens/GamePlayScreen"));
 const Start = lazy(() => import("./screens/StartScreen"));
+const GameOver = lazy(() => import("./screens/GameOverScreen"));
 
 const GamePlayScreen = () => (
   <Suspense fallback={<LoadingScreen />}>
@@ -19,6 +20,12 @@ const GamePlayScreen = () => (
 const StartScreen = () => (
   <Suspense fallback={<LoadingScreen />}>
     <Start />
+  </Suspense>
+);
+
+const GameOverScreen = () => (
+  <Suspense fallback={<LoadingScreen />}>
+    <GameOver />
   </Suspense>
 );
 
@@ -34,6 +41,10 @@ const Routes: RouteObject[] = [
   {
     path: "/loading",
     element: <LoadingScreen />,
+  },
+  {
+    path: "/game-over",
+    element: <GameOverScreen />,
   },
 ];
 

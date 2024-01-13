@@ -4,6 +4,7 @@ import MessageServiceWithAmount from "../types/MessageServiceWithAmount.interfac
 import MessageServiceWithOriginIDAmount from "../types/MessageServiceWithOriginIDAmount.interface";
 import MessageServiceWithID from "../types/MessageServiceWithID.interface";
 import MessageServiceWithIDAmount from "../types/MessageServiceWithIDAmount.interface";
+import NavPath from "../types/NavPath.type";
 
 export default class MessageService {
   public static send(msg: MessageServiceType) {
@@ -30,6 +31,10 @@ export default class MessageService {
   public static sendWithID(value: MessageServiceWithID) {
     const { type, id } = value;
     window.postMessage({ type, id });
+  }
+
+  public static navigateScreen(screen: NavPath) {
+    window.postMessage({ type: "navigate-screen", screen });
   }
 
   constructor(context: InputState) {

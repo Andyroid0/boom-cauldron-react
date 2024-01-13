@@ -27,5 +27,6 @@ const config: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   roundPixels: true,
 };
-// eslint-disable-next-line import/no-anonymous-default-export
-export default new Phaser.Game(config);
+// export default new Phaser.Game(config);
+const Start = () => new Phaser.Game(config);
+export default Start;
