@@ -26,12 +26,22 @@ class Player extends Physics.Matter.Sprite implements Player {
     inputManager: InputManager,
   ) {
     const label = EntityService.generateID();
+
+    super(world, 0, 0, "hero", 0);
     const bodyOptions: Types.Physics.Matter.MatterBodyConfig = {
       label,
       shape: "circle",
       frictionAir: 0.2,
+      render: {
+        sprite: { xOffset: 0, yOffset: 0.2 },
+      },
     };
-    super(world, 0, 0, "hero", 0, bodyOptions);
+    const setBodyConfig: Types.Physics.Matter.MatterSetBodyConfig = {
+      type: "circle",
+      radius: 16,
+    };
+
+    this.setBody(setBodyConfig, bodyOptions);
     this.setFixedRotation();
     this.id = label;
     this.map = map;
@@ -39,14 +49,6 @@ class Player extends Physics.Matter.Sprite implements Player {
     this.layer = layer;
     this.world = world;
     this.inputManager = inputManager;
-
-    // this.fillStyle(0xedca40, 1);
-    // this.fillRect(
-    //   0,
-    //   0,
-    //   this.map.tileWidth * this.layer.scaleX,
-    //   this.map.tileHeight * this.layer.scaleY,
-    // );
 
     scene.add.existing(this);
     useStateStore.getState().setPlayerHealth(this.health);
