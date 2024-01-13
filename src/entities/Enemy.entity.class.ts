@@ -1,4 +1,4 @@
-import { Physics, Types } from "phaser";
+import { Math as PMath, Physics, Types } from "phaser";
 import Color from "color";
 
 import EntityID from "../types/EntityID.properties.class";
@@ -9,7 +9,6 @@ import EntityService from "../services/EntityService";
 import MessageService from "../services/MessageService";
 import MoveState from "../types/MoveState";
 import MovementService from "../services/MovementService";
-import MessageServiceOrigin from "../types/MessageServiceOrigin.type";
 
 interface Enemy extends EntityID, EntityStat, EnemyDeps {}
 class Enemy extends Physics.Matter.Sprite implements Enemy {
@@ -19,6 +18,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   speed = 1;
   damage = 1;
   moveState: MoveState = "idle";
+  previousPlayerPosition: PMath.Vector2 | undefined;
 
   constructor(inj: EnemyInjectable) {
     const label = EntityService.generateID();
@@ -36,8 +36,10 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     };
     this.setBody(setBodyConfig, bodyOptions);
     this.setFixedRotation();
-    this.setOnCollide((data: Types.Physics.Matter.MatterCollisionData) =>
-      this.handleCollide(data, this.damage, "enemy"),
+    this.setOnCollideActive(
+      (data: Types.Physics.Matter.MatterCollisionData) => {
+        this.handleCollide(data, this.damage);
+      },
     );
     this.id = label;
     this.multiplier = inj.multiplier;
@@ -57,12 +59,10 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   handleCollide(
     data: Types.Physics.Matter.MatterCollisionData,
     amount: number,
-    origin: MessageServiceOrigin,
   ) {
-    if (data.bodyA.label !== "wall" && data.bodyA.label !== "item") {
-      MessageService.sendWithOriginIDAmount({
-        type: "enemy-collision",
-        origin,
+    if (this.player?.id === data.bodyA.label) {
+      MessageService.sendWithIDAmount({
+        type: "enemy-attack",
         id: data.bodyA.label,
         amount,
       });
@@ -105,36 +105,34 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   update(time: number) {
     this.x = Math.round(this.x);
     this.y = Math.round(this.y);
+    this.handleMovement(time);
+  }
+
+  handleMovement(time: number) {
     if (!this.map || !this.layer || !this.player) return;
-
-    // const attackDelay = 400;
-
-    // if (
-    //   time > this.lastAttackTime + attackDelay &&
-    //   thisX === playerX &&
-    //   thisY === playerY
-    // ) {
-    //   // TODO: handle this with collision.
-    //   this.attack(1);
-    //   this.lastAttackTime = time;
-    // }
-
     const repeatMoveDelay = 200;
-    if (time > this.lastMoveTime + repeatMoveDelay) {
+    if (
+      this.previousPlayerPosition !==
+      new PMath.Vector2(this.player?.body?.position)
+    ) {
+      // if (time > this.lastMoveTime + repeatMoveDelay) {
       const thisX = this.map.worldToTileX(this.x, true) as number;
       const thisY = this.map.worldToTileY(this.y, true) as number;
-      const playerX = this.map.worldToTileX(this.player.x, true) as number;
-      const playerY = this.map.worldToTileY(this.player.y, true) as number;
+      const playerX = this.map.worldToTileX(
+        this.player.body?.position.x as number,
+        true,
+      ) as number;
+      const playerY = this.map.worldToTileY(
+        this.player.body?.position.y as number,
+        true,
+      ) as number;
 
-      this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-        if (!path) return;
-        const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
-        if (!coord) return;
+      if (Math.abs(thisX - playerX) <= 1 || Math.abs(thisY - playerY) <= 1) {
         const moveState = MovementService.pathFindingCompass(
-          path[1].x,
-          path[1].y,
-          thisX,
-          thisY,
+          this.player.x,
+          this.player.y,
+          this.x,
+          this.y,
         );
         const velocity = this.getVelocity();
         const calculatedVelocity = MovementService.calculateVelocity(
@@ -143,35 +141,45 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
           this.speed,
         );
         this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
-      });
-      this.easyStar!.calculate();
+      } else {
+        this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
+          // const coord = path.length
+          //   ? this.map?.tileToWorldXY(path[1].x, path[1].y)
+          //   : new PMath.Vector2({ x: this.player?.x, y: this.player?.y });
+          const coord = path[1]
+            ? this.map?.tileToWorldXY(path[1].x, path[1].y)
+            : new PMath.Vector2({ x: this.player?.x, y: this.player?.y });
+          if (!coord) return;
+          const moveState = MovementService.pathFindingCompass(
+            playerX,
+            playerY,
+            thisX,
+            thisY,
+          );
+          // const moveState = path.length
+          //   ? MovementService.pathFindingCompass(playerX, playerY, thisX, thisY)
+          //   : MovementService.pathFindingCompass(
+          //       this.player?.x as number,
+          //       this.player?.y as number,
+          //       thisX,
+          //       thisY,
+          //     );
+          const velocity = this.getVelocity();
+          const calculatedVelocity = MovementService.calculateVelocity(
+            moveState,
+            { x: velocity.x ?? 0, y: velocity.y ?? 0 },
+            this.speed,
+          );
+          this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
+        });
+        this.easyStar!.calculate();
+      }
+
       this.lastMoveTime = time;
+      this.previousPlayerPosition = new PMath.Vector2(
+        this.player?.body?.position,
+      );
     }
-  }
-
-  findPath() {
-    if (!this.player)
-      throw new Error(`Player undefined within Enemy ID: ${this.id}.`);
-    if (!this.map)
-      throw new Error(`Map undefined within Enemy ID: ${this.id}.`);
-    if (!this.easyStar)
-      throw new Error(`EasyStar undefined within Enemy ID: ${this.id}.`);
-
-    this.easyStar.findPath(
-      this.map.worldToTileX(this.x) as number,
-      this.map.worldToTileY(this.y) as number,
-      this.map.worldToTileX(this.player.x) as number,
-      this.map.worldToTileY(this.player.y) as number,
-      (path) => {
-        // eslint-disable-next-line no-alert
-        if (path === null) alert("Path was not found.");
-        else {
-          // eslint-disable-next-line no-alert
-          alert(`Path was found. The first Point is ${path[0].x} ${path[0].y}`);
-        }
-      },
-    );
-    this.easyStar.calculate();
   }
 }
 

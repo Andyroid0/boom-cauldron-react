@@ -3,6 +3,7 @@ import MessageServiceType from "../types/MessageServiceType.type";
 import MessageServiceWithAmount from "../types/MessageServiceWithAmount.interface";
 import MessageServiceWithOriginIDAmount from "../types/MessageServiceWithOriginIDAmount.interface";
 import MessageServiceWithID from "../types/MessageServiceWithID.interface";
+import MessageServiceWithIDAmount from "../types/MessageServiceWithIDAmount.interface";
 
 export default class MessageService {
   public static send(msg: MessageServiceType) {
@@ -18,6 +19,11 @@ export default class MessageService {
     value: MessageServiceWithOriginIDAmount,
   ) {
     const { type, origin, id, amount } = value;
+    window.postMessage({ type, origin, id, amount });
+  }
+
+  public static sendWithIDAmount(value: MessageServiceWithIDAmount) {
+    const { type, id, amount } = value;
     window.postMessage({ type, origin, id, amount });
   }
 

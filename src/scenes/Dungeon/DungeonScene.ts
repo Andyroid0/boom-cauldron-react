@@ -106,7 +106,7 @@ class DungeonScene extends Scene {
       this.matter.world,
     );
 
-    this.enemyManager.create(playerRoom, 4, 4, "lab-bot");
+    this.enemyManager.create(playerRoom, 2, 2, "lab-bot");
 
     if (!debug) {
       // Make the starting room visible

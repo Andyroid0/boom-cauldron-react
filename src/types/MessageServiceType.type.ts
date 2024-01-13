@@ -13,6 +13,7 @@ type MessageServiceType =
   | "projectile-collision"
   | "enemy-death"
   | "enemy-collision"
+  | "enemy-attack"
   | "player-death";
 
 export default MessageServiceType;
