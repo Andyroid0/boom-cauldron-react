@@ -55,9 +55,6 @@ class Player extends Physics.Matter.Sprite implements Player {
     window.addEventListener(
       "message",
       (event: MessageEvent<MessageServiceWithAmount>) => {
-        if (event.data.type === "enemy-collision") {
-          this.takeDamage(event.data.amount);
-        }
         const offset = 48;
         if (event.data.type === "player1-fire-up") {
           const dmg = 1;
@@ -124,8 +121,6 @@ class Player extends Physics.Matter.Sprite implements Player {
     this.x = Math.round(this.x);
     this.y = Math.round(this.y);
     if (!this.map || !this.layer) return;
-    const tw = this.map.tileWidth * this.layer.scaleX;
-    const th = this.map.tileHeight * this.layer.scaleY;
     const repeatMoveDelay = 160;
 
     if (time > this.lastMoveTime + repeatMoveDelay) {

@@ -44,6 +44,8 @@ class EnemyManager implements EnemyManager {
     };
 
     this.easyStar.setGrid(easyStarGrid());
+    this.easyStar.enableDiagonals();
+    this.easyStar.enableCornerCutting();
     this.easyStar.setAcceptableTiles([0]);
 
     const handleProjectileEvent = (

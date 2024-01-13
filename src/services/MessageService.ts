@@ -3,6 +3,8 @@ import MessageServiceType from "../types/MessageServiceType.type";
 import MessageServiceWithAmount from "../types/MessageServiceWithAmount.interface";
 import MessageServiceWithOriginIDAmount from "../types/MessageServiceWithOriginIDAmount.interface";
 import MessageServiceWithID from "../types/MessageServiceWithID.interface";
+import MessageServiceWithIDAmount from "../types/MessageServiceWithIDAmount.interface";
+import NavPath from "../types/NavPath.type";
 
 export default class MessageService {
   public static send(msg: MessageServiceType) {
@@ -21,9 +23,18 @@ export default class MessageService {
     window.postMessage({ type, origin, id, amount });
   }
 
+  public static sendWithIDAmount(value: MessageServiceWithIDAmount) {
+    const { type, id, amount } = value;
+    window.postMessage({ type, origin, id, amount });
+  }
+
   public static sendWithID(value: MessageServiceWithID) {
     const { type, id } = value;
     window.postMessage({ type, id });
+  }
+
+  public static navigateScreen(screen: NavPath) {
+    window.postMessage({ type: "navigate-screen", screen });
   }
 
   constructor(context: InputState) {

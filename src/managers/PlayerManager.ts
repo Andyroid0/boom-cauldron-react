@@ -3,6 +3,7 @@ import { Room } from "@mikewesthad/dungeon";
 
 import Player from "../entities/Player.entity.class";
 import PlayerDeps from "../types/PlayerDeps.dependencies.class";
+import MessageServiceWithIDAmount from "../types/MessageServiceWithIDAmount.interface";
 
 import InputManager from "./InputManager";
 
@@ -37,6 +38,22 @@ class PlayerManager implements PlayerManager {
     this.pool.push(player);
     player.x = this.map.tileToWorldX(room.x + coordX) as number;
     player.y = this.map.tileToWorldY(room.y + coordY) as number;
+
+    window.addEventListener(
+      "message",
+      (event: MessageEvent<MessageServiceWithIDAmount>) => {
+        if (event.data.type === "enemy-attack") {
+          const playerIndex = this.pool.findIndex(
+            (i) => i.id === event.data.id,
+          );
+          if (playerIndex === -1) return;
+          const player = this.pool[playerIndex];
+
+          player.takeDamage(event.data.amount);
+          if (player.health <= 0) this.pool.splice(playerIndex, 1);
+        }
+      },
+    );
     return player;
   }
 
