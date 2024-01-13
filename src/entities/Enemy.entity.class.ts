@@ -9,6 +9,7 @@ import EntityService from "../services/EntityService";
 import MessageService from "../services/MessageService";
 import MoveState from "../types/MoveState";
 import MovementService from "../services/MovementService";
+import CoolDownManager from "../managers/CoolDownManager";
 
 interface Enemy extends EntityID, EntityStat, EnemyDeps {}
 class Enemy extends Physics.Matter.Sprite implements Enemy {
@@ -19,6 +20,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   damage = 1;
   moveState: MoveState = "idle";
   previousPlayerPosition: PMath.Vector2 | undefined;
+  coolDownManager: CoolDownManager = new CoolDownManager(300);
 
   constructor(inj: EnemyInjectable) {
     const label = EntityService.generateID();
@@ -38,7 +40,10 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     this.setFixedRotation();
     this.setOnCollideActive(
       (data: Types.Physics.Matter.MatterCollisionData) => {
-        this.handleCollide(data, this.damage);
+        if (this.coolDownManager.state === "cool") {
+          this.handleCollide(data, this.damage);
+          this.coolDownManager.setAction();
+        }
       },
     );
     this.id = label;
@@ -105,12 +110,12 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   update(time: number) {
     this.x = Math.round(this.x);
     this.y = Math.round(this.y);
+    this.coolDownManager.update(time);
     this.handleMovement(time);
   }
 
   handleMovement(time: number) {
     if (!this.map || !this.layer || !this.player) return;
-    const repeatMoveDelay = 200;
     if (
       this.previousPlayerPosition !==
       new PMath.Vector2(this.player?.body?.position)
@@ -143,9 +148,6 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
         this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
       } else {
         this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-          // const coord = path.length
-          //   ? this.map?.tileToWorldXY(path[1].x, path[1].y)
-          //   : new PMath.Vector2({ x: this.player?.x, y: this.player?.y });
           const coord = path[1]
             ? this.map?.tileToWorldXY(path[1].x, path[1].y)
             : new PMath.Vector2({ x: this.player?.x, y: this.player?.y });
@@ -156,14 +158,6 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
             thisX,
             thisY,
           );
-          // const moveState = path.length
-          //   ? MovementService.pathFindingCompass(playerX, playerY, thisX, thisY)
-          //   : MovementService.pathFindingCompass(
-          //       this.player?.x as number,
-          //       this.player?.y as number,
-          //       thisX,
-          //       thisY,
-          //     );
           const velocity = this.getVelocity();
           const calculatedVelocity = MovementService.calculateVelocity(
             moveState,

@@ -12,7 +12,7 @@ import Projectile from "./Projectile.entity";
 interface Player extends EntityID, EntityStat {}
 class Player extends Physics.Matter.Sprite implements Player {
   lastMoveTime = 0;
-  health = 10000000;
+  health = 10;
   map: Tilemaps.Tilemap | undefined;
   layer: Tilemaps.TilemapLayer | undefined;
   speed = 5;
@@ -111,7 +111,6 @@ class Player extends Physics.Matter.Sprite implements Player {
 
   public takeDamage(dmg: number) {
     this.health -= dmg;
-    console.log("health: ", this.health);
     useStateStore.getState().setPlayerHealth(this.health);
   }
 
@@ -122,8 +121,6 @@ class Player extends Physics.Matter.Sprite implements Player {
     this.x = Math.round(this.x);
     this.y = Math.round(this.y);
     if (!this.map || !this.layer) return;
-    // const tw = this.map.tileWidth * this.layer.scaleX;
-    // const th = this.map.tileHeight * this.layer.scaleY;
     const repeatMoveDelay = 160;
 
     if (time > this.lastMoveTime + repeatMoveDelay) {
