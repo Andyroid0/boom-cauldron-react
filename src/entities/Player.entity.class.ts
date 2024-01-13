@@ -53,6 +53,9 @@ class Player extends Physics.Matter.Sprite implements Player {
     window.addEventListener(
       "message",
       (event: MessageEvent<MessageServiceWithAmount>) => {
+        if (event.data.type === "enemy-collision") {
+          this.takeDamage(event.data.amount);
+        }
         const offset = 48;
         if (event.data.type === "player1-fire-up") {
           const dmg = 1;
@@ -91,8 +94,6 @@ class Player extends Physics.Matter.Sprite implements Player {
   }
 
   public attack(dmg: number, dir: PMath.Vector2, offset: PMath.Vector2) {
-    // check area to see what the tile contains
-    // enemy.takeDamage(damage);
     if (!this.map || !this.layer || !this.world) return;
     new Projectile(
       "player",
@@ -115,6 +116,9 @@ class Player extends Physics.Matter.Sprite implements Player {
   }
 
   public update(time: number) {
+    if (this.health <= 0) {
+      this.destroy();
+    }
     this.x = Math.round(this.x);
     this.y = Math.round(this.y);
     if (!this.map || !this.layer) return;

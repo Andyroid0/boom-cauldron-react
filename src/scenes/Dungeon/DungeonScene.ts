@@ -116,13 +116,6 @@ class DungeonScene extends Scene {
     // Scroll to the player
     this.cam = this.cameras.main;
 
-    // this.cam.setBounds(
-    //   0,
-    //   0,
-    //   this.layer.width * this.layer.scaleX,
-    //   this.layer.height * this.layer.scaleY,
-    // );
-
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
     } else console.warn("Keyboard isn't present.");

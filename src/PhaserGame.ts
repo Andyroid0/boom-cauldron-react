@@ -18,8 +18,8 @@ const config: Phaser.Types.Core.GameConfig = {
     matter: {
       gravity: { y: 0 },
       debug: {
-        showBody: true,
-        showStaticBody: true,
+        showBody: false,
+        showStaticBody: false,
       },
     },
   },

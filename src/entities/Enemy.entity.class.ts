@@ -9,6 +9,7 @@ import EntityService from "../services/EntityService";
 import MessageService from "../services/MessageService";
 import MoveState from "../types/MoveState";
 import MovementService from "../services/MovementService";
+import MessageServiceOrigin from "../types/MessageServiceOrigin.type";
 
 interface Enemy extends EntityID, EntityStat, EnemyDeps {}
 class Enemy extends Physics.Matter.Sprite implements Enemy {
@@ -16,6 +17,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   lastAttackTime = 0;
   health = 0;
   speed = 1;
+  damage = 1;
   moveState: MoveState = "idle";
 
   constructor(inj: EnemyInjectable) {
@@ -26,6 +28,9 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     };
     super(inj.world, 0, 0, "enemy", 0, bodyOptions);
     this.setFixedRotation();
+    this.setOnCollide((data: Types.Physics.Matter.MatterCollisionData) =>
+      this.handleCollide(data, this.damage, "enemy"),
+    );
     this.id = label;
     this.multiplier = inj.multiplier;
     this.player = inj.dependencies.player;
@@ -39,6 +44,22 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
 
   attack(dmg: number) {
     this.player?.takeDamage(dmg);
+  }
+
+  handleCollide(
+    data: Types.Physics.Matter.MatterCollisionData,
+    amount: number,
+    origin: MessageServiceOrigin,
+  ) {
+    if (data.bodyA.label !== "wall" && data.bodyA.label !== "item") {
+      MessageService.sendWithOriginIDAmount({
+        type: "enemy-collision",
+        origin,
+        id: data.bodyA.label,
+        amount,
+      });
+      // play projectile collision animation here.
+    }
   }
 
   takeDamage(dmg: number) {
