@@ -9,6 +9,7 @@ import EntityService from "../services/EntityService";
 import MessageService from "../services/MessageService";
 import MoveState from "../types/MoveState";
 import MovementService from "../services/MovementService";
+import MessageServiceOrigin from "../types/MessageServiceOrigin.type";
 
 interface Enemy extends EntityID, EntityStat, EnemyDeps {}
 class Enemy extends Physics.Matter.Sprite implements Enemy {
@@ -16,6 +17,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   lastAttackTime = 0;
   health = 0;
   speed = 1;
+  damage = 1;
   moveState: MoveState = "idle";
 
   constructor(inj: EnemyInjectable) {
@@ -26,6 +28,9 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     };
     super(inj.world, 0, 0, "enemy", 0, bodyOptions);
     this.setFixedRotation();
+    this.setOnCollide((data: Types.Physics.Matter.MatterCollisionData) =>
+      this.handleCollide(data, this.damage, "enemy"),
+    );
     this.id = label;
     this.multiplier = inj.multiplier;
     this.player = inj.dependencies.player;
@@ -39,6 +44,22 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
 
   attack(dmg: number) {
     this.player?.takeDamage(dmg);
+  }
+
+  handleCollide(
+    data: Types.Physics.Matter.MatterCollisionData,
+    amount: number,
+    origin: MessageServiceOrigin,
+  ) {
+    if (data.bodyA.label !== "wall" && data.bodyA.label !== "item") {
+      MessageService.sendWithOriginIDAmount({
+        type: "enemy-collision",
+        origin,
+        id: data.bodyA.label,
+        amount,
+      });
+      // play projectile collision animation here.
+    }
   }
 
   takeDamage(dmg: number) {
@@ -74,6 +95,8 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   }
 
   update(time: number) {
+    this.x = Math.round(this.x);
+    this.y = Math.round(this.y);
     if (!this.map || !this.layer || !this.player) return;
 
     // const attackDelay = 400;
@@ -116,39 +139,6 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
       this.easyStar!.calculate();
       this.lastMoveTime = time;
     }
-
-    // if (!this.scene.tweens.isTweening(this)) {
-    //   this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-    //     if (path) {
-    //       if (path[0] === path[1]) {
-    //         // sitting on player / collision
-    //         // this.attack();
-    //         return;
-    //       }
-    //       const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
-    //       if (!coord) return;
-    //       if (
-    //         this.map &&
-    //         !TileTools.isTileOpenAt(coord.x, coord.y, this.map)
-    //       ) {
-    //         return;
-    //       }
-    //       const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-    //         targets: this,
-    //         y: coord.y,
-    //         x: coord.x,
-    //         duration: 100,
-    //         ease: "Linear",
-    //         repeat: 0,
-    //         yoyo: false,
-    //       };
-    //       this.scene.tweens.add(tweenConfig);
-    //       this.lastMoveTime = time;
-    //     }
-    //   });
-    //   this.easyStar!.calculate();
-    // }
-    // }
   }
 
   findPath() {

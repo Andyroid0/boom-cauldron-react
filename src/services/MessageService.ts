@@ -32,21 +32,6 @@ export default class MessageService {
         case "toggle-pause":
           context.paused = !context.paused;
           break;
-        case "toggle-left":
-          context.left = !context.left;
-          break;
-        case "toggle-right":
-          context.right = !context.right;
-          break;
-        case "toggle-up":
-          context.up = !context.up;
-          break;
-        case "toggle-down":
-          context.down = !context.down;
-          break;
-        case "toggle-grab":
-          context.grab = !context.grab;
-          break;
       }
     };
     window.addEventListener("message", handleEvent);

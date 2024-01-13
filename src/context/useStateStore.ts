@@ -17,21 +17,6 @@ interface AppState {
   paused: boolean;
   togglePaused: () => void;
 
-  up: boolean;
-  toggleUp: () => void;
-
-  down: boolean;
-  toggleDown: () => void;
-
-  left: boolean;
-  toggleLeft: () => void;
-
-  right: boolean;
-  toggleRight: () => void;
-
-  grab: boolean;
-  toggleGrab: () => void;
-
   playerHealth: number;
   setPlayerHealth: (value: number) => void;
 }
@@ -62,31 +47,6 @@ const useStateStore = create<AppState>()(
       paused: false,
       togglePaused: () => {
         set({ paused: !get().paused });
-      },
-
-      up: false,
-      toggleUp: () => {
-        set({ up: !get().up });
-      },
-
-      down: false,
-      toggleDown: () => {
-        set({ down: !get().down });
-      },
-
-      left: false,
-      toggleLeft: () => {
-        set({ left: !get().left });
-      },
-
-      right: false,
-      toggleRight: () => {
-        set({ right: !get().right });
-      },
-
-      grab: false,
-      toggleGrab: () => {
-        set({ grab: !get().grab });
       },
 
       playerHealth: 10,
