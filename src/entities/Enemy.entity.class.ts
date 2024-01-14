@@ -121,18 +121,16 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
       new PMath.Vector2(this.player?.body?.position)
     ) {
       // if (time > this.lastMoveTime + repeatMoveDelay) {
-      const thisX = this.map.worldToTileX(this.x, true) as number;
-      const thisY = this.map.worldToTileY(this.y, true) as number;
+      const thisX = this.map.worldToTileX(this.x) as number;
+      const thisY = this.map.worldToTileY(this.y) as number;
       const playerX = this.map.worldToTileX(
         this.player.body?.position.x as number,
-        true,
       ) as number;
       const playerY = this.map.worldToTileY(
         this.player.body?.position.y as number,
-        true,
       ) as number;
 
-      if (Math.abs(thisX - playerX) <= 1 || Math.abs(thisY - playerY) <= 1) {
+      if (Math.abs(thisX - playerX) <= 1 && Math.abs(thisY - playerY) <= 1) {
         const moveState = MovementService.pathFindingCompass(
           this.player.x,
           this.player.y,
@@ -148,13 +146,13 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
         this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
       } else {
         this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-          const coord = path[1]
-            ? this.map?.tileToWorldXY(path[1].x, path[1].y)
-            : new PMath.Vector2({ x: this.player?.x, y: this.player?.y });
+          if (!path || !path.length) return;
+
+          const coord = this.map?.tileToWorldXY(path[1].x, path[1].y);
           if (!coord) return;
           const moveState = MovementService.pathFindingCompass(
-            playerX,
-            playerY,
+            coord.x,
+            coord.y,
             thisX,
             thisY,
           );
