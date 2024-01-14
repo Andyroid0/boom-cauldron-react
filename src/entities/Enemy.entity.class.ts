@@ -21,6 +21,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   moveState: MoveState = "idle";
   previousPlayerPosition: PMath.Vector2 | undefined;
   coolDownManager: CoolDownManager = new CoolDownManager(300);
+  pathFindingOffset = 0;
 
   constructor(inj: EnemyInjectable) {
     const label = EntityService.generateID();
@@ -55,6 +56,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     this.layer = inj.dependencies.layer;
     this.health = inj.health;
     this.scene.add.existing(this);
+    this.pathFindingOffset = inj.pathFindingOffset ?? 0;
   }
 
   attack(dmg: number) {
@@ -116,28 +118,50 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
 
   handleMovement(time: number) {
     if (!this.map || !this.layer || !this.player) return;
-    if (
+
+    // if (time > this.lastMoveTime + repeatMoveDelay) {
+    const thisX = Math.round(this.map.worldToTileX(this.x) as number);
+    const thisY = Math.round(this.map.worldToTileY(this.y) as number);
+    const playerX = Math.round(
+      this.map.worldToTileX(this.player.body?.position.x as number) as number,
+    );
+    const playerY = Math.round(
+      this.map.worldToTileY(this.player.body?.position.y as number) as number,
+    );
+
+    if (Math.abs(thisX - playerX) <= 1 && Math.abs(thisY - playerY) <= 1) {
+      // BEELINE TO PLAYER
+      const moveState = MovementService.pathFindingCompass(
+        this.player.x,
+        this.player.y,
+        this.x,
+        this.y,
+      );
+      const velocity = this.getVelocity();
+      const calculatedVelocity = MovementService.calculateVelocity(
+        moveState,
+        { x: velocity.x ?? 0, y: velocity.y ?? 0 },
+        this.speed,
+      );
+      this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
+    } else if (
       this.previousPlayerPosition !==
       new PMath.Vector2(this.player?.body?.position)
     ) {
-      // if (time > this.lastMoveTime + repeatMoveDelay) {
-      const thisX = this.map.worldToTileX(this.x, true) as number;
-      const thisY = this.map.worldToTileY(this.y, true) as number;
-      const playerX = this.map.worldToTileX(
-        this.player.body?.position.x as number,
-        true,
-      ) as number;
-      const playerY = this.map.worldToTileY(
-        this.player.body?.position.y as number,
-        true,
-      ) as number;
+      // USE PATHFINDING
+      this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
+        if (!path || !path.length) return;
 
-      if (Math.abs(thisX - playerX) <= 1 || Math.abs(thisY - playerY) <= 1) {
+        const destination = this.map?.tileToWorldXY(
+          path[1].x,
+          path[1].y,
+        ) as PMath.Vector2;
+
         const moveState = MovementService.pathFindingCompass(
-          this.player.x,
-          this.player.y,
-          this.x,
-          this.y,
+          destination.x,
+          destination.y,
+          this.x - this.pathFindingOffset,
+          this.y - this.pathFindingOffset,
         );
         const velocity = this.getVelocity();
         const calculatedVelocity = MovementService.calculateVelocity(
@@ -146,34 +170,14 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
           this.speed,
         );
         this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
-      } else {
-        this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-          const coord = path[1]
-            ? this.map?.tileToWorldXY(path[1].x, path[1].y)
-            : new PMath.Vector2({ x: this.player?.x, y: this.player?.y });
-          if (!coord) return;
-          const moveState = MovementService.pathFindingCompass(
-            playerX,
-            playerY,
-            thisX,
-            thisY,
-          );
-          const velocity = this.getVelocity();
-          const calculatedVelocity = MovementService.calculateVelocity(
-            moveState,
-            { x: velocity.x ?? 0, y: velocity.y ?? 0 },
-            this.speed,
-          );
-          this.setVelocity(calculatedVelocity.x, calculatedVelocity.y);
-        });
-        this.easyStar!.calculate();
-      }
-
-      this.lastMoveTime = time;
-      this.previousPlayerPosition = new PMath.Vector2(
-        this.player?.body?.position,
-      );
+      });
+      this.easyStar!.calculate();
     }
+
+    this.lastMoveTime = time;
+    this.previousPlayerPosition = new PMath.Vector2(
+      this.player?.body?.position,
+    );
   }
 }
 

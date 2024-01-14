@@ -47,7 +47,6 @@ class DungeonScene extends Scene {
 
   create() {
     this.inputManager = new InputManager(this);
-
     //  40,000 tile test
     this.dungeon = new Dungeon({
       width: 60,
@@ -76,8 +75,8 @@ class DungeonScene extends Scene {
       this,
     );
 
-    const excludeFromCollision = [0, 48, 49];
-    this.layer.setCollisionByExclusion(excludeFromCollision);
+    // const excludeFromCollision = [0, 48, 49];
+    // this.layer.setCollisionByExclusion(excludeFromCollision);
 
     // Hide all the rooms
     if (!debug) {
@@ -105,7 +104,7 @@ class DungeonScene extends Scene {
       this.matter.world,
     );
 
-    this.enemyManager.create(playerRoom, 2, 2, "lab-bot");
+    this.enemyManager.create(playerRoom, 4, 4, "lab-bot", 24);
 
     if (!debug) {
       // Make the starting room visible
