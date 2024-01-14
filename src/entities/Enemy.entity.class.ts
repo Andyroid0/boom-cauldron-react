@@ -32,6 +32,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
       render: {
         sprite: { xOffset: 0, yOffset: 0.3 },
       },
+      frictionAir: 0.2,
     };
     const setBodyConfig: Types.Physics.Matter.MatterSetBodyConfig = {
       type: "circle",
@@ -110,10 +111,16 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   }
 
   update(time: number) {
-    this.x = Math.round(this.x);
-    this.y = Math.round(this.y);
+    this.roundPositions();
     this.coolDownManager.update(time);
     this.handleMovement(time);
+  }
+
+  roundPositions() {
+    if (this.x && this.y) {
+      this.x = Math.round(this.x);
+      this.y = Math.round(this.y);
+    }
   }
 
   handleMovement(time: number) {
@@ -150,7 +157,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     ) {
       // USE PATHFINDING
       this.easyStar!.findPath(thisX, thisY, playerX, playerY, (path) => {
-        if (!path || !path.length) return;
+        if (!path || !path.length || !this.body?.position) return;
 
         const destination = this.map?.tileToWorldXY(
           path[1].x,
