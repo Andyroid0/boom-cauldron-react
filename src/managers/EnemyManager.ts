@@ -68,7 +68,13 @@ class EnemyManager implements EnemyManager {
     window.addEventListener("message", handleProjectileEvent);
   }
 
-  create(room: Room, coordX: number, coordY: number, type: EnemyType) {
+  create(
+    room: Room,
+    coordX: number,
+    coordY: number,
+    type: EnemyType,
+    pathFindingOffset?: number,
+  ) {
     if (!this.map) return;
     const enemy = new Enemy({
       dependencies: {
@@ -83,6 +89,7 @@ class EnemyManager implements EnemyManager {
       multiplier: 1,
       world: this.world,
       health: 10,
+      pathFindingOffset,
     });
     this.pool.push(enemy);
     enemy.x = this.map.tileToWorldX(room.x + coordX) as number;

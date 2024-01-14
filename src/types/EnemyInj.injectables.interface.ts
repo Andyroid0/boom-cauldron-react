@@ -9,4 +9,5 @@ export default interface EnemyInj {
   dependencies: EnemyDeps;
   world: Physics.Matter.World;
   health: number;
+  pathFindingOffset?: number;
 }
