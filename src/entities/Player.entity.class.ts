@@ -59,7 +59,7 @@ class Player extends Physics.Matter.Sprite implements Player {
         this.attack(
           dmg,
           new PMath.Vector2({ x: 0, y: -3 }),
-          new PMath.Vector2({ x: 0, y: -offset }),
+          this.getTopCenter(),
         );
       }
       if (data.type === "player1-fire-down") {
@@ -67,7 +67,7 @@ class Player extends Physics.Matter.Sprite implements Player {
         this.attack(
           dmg,
           new PMath.Vector2({ x: 0, y: 3 }),
-          new PMath.Vector2({ x: 0, y: offset }),
+          this.getBottomCenter(),
         );
       }
       if (data.type === "player1-fire-left") {
@@ -75,7 +75,7 @@ class Player extends Physics.Matter.Sprite implements Player {
         this.attack(
           dmg,
           new PMath.Vector2({ x: -3, y: 0 }),
-          new PMath.Vector2({ x: -offset, y: 0 }),
+          this.getLeftCenter(),
         );
       }
       if (data.type === "player1-fire-right") {
@@ -83,13 +83,13 @@ class Player extends Physics.Matter.Sprite implements Player {
         this.attack(
           dmg,
           new PMath.Vector2({ x: 3, y: 0 }),
-          new PMath.Vector2({ x: offset, y: 0 }),
+          this.getRightCenter(),
         );
       }
     });
   }
 
-  public attack(dmg: number, dir: PMath.Vector2, offset: PMath.Vector2) {
+  public attack(dmg: number, dir: PMath.Vector2, position: PMath.Vector2) {
     if (!this.map || !this.layer || !this.world) return;
     new Projectile(
       "player",
@@ -97,7 +97,7 @@ class Player extends Physics.Matter.Sprite implements Player {
       this.scene,
       this.world,
       {
-        startPosition: { x: this.x + offset.x, y: this.y + offset.y },
+        startPosition: position,
         velocity: { x: dir.x, y: dir.y },
       },
       this.layer,

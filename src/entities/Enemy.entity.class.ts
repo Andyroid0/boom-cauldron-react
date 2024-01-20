@@ -76,6 +76,11 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
 
   takeDamage(dmg: number) {
     this.health -= dmg;
+    if (this.health <= 0) {
+      this.handleDeath();
+    }
+    if (this.scene.tweens.isTweening(this)) return;
+
     const originalTint = this.tint;
     this.tintFill = true;
     this.setTintFill(Color("#ffffff").rgbNumber().valueOf());
@@ -94,10 +99,6 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
       this.tintFill = false;
       this.alpha = 1;
     }, 200);
-
-    if (this.health <= 0) {
-      this.handleDeath();
-    }
   }
 
   handleDeath() {
