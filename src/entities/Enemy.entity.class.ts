@@ -69,36 +69,32 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     amount: number,
   ) {
     if (this.player?.id === data.bodyA.label) {
-      MessageService.sendWithIDAmount({
-        type: "enemy-attack",
-        id: data.bodyA.label,
-        amount,
-      });
+      MessageService.enemyAttackPlayer(data.bodyA.label, amount);
       // play projectile collision animation here.
     }
   }
 
   takeDamage(dmg: number) {
     this.health -= dmg;
-    // run damage anim or flash
-    this.tintFill = true;
     const originalTint = this.tint;
+    this.tintFill = true;
+    this.setTintFill(Color("#ffffff").rgbNumber().valueOf());
+    // run damage anim or flash
     const tweenConfig: Types.Tweens.TweenBuilderConfig = {
-      targets: this.tint,
-      value: Color("#ffffff").rgbNumber().valueOf(),
-      duration: 120,
+      targets: this,
+      alpha: 0.2,
+      duration: 100,
       ease: "Linear",
-      repeat: 0,
+      repeat: 1,
       yoyo: true,
-      onComplete: () => {
-        this.tint = originalTint;
-        this.tintFill = false;
-      },
-      onUpdate: (tween, target) => {
-        this.setTintFill(tween.getValue());
-      },
     };
     this.scene.tweens.add(tweenConfig);
+    setTimeout(() => {
+      this.setTintFill(originalTint);
+      this.tintFill = false;
+      this.alpha = 1;
+    }, 200);
+
     if (this.health <= 0) {
       this.handleDeath();
     }
@@ -106,7 +102,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
 
   handleDeath() {
     // play death animation
-    MessageService.sendWithID({ type: "enemy-death", id: this.id as string });
+    MessageService.enemyDeath(this.id as string);
     this.destroy(true);
   }
 

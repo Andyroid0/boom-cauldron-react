@@ -1,10 +1,13 @@
 import { Input, Scene, Types } from "phaser";
 
 import MessageService from "../services/MessageService";
+import GameState from "../types/GameState.class";
 
 class InputManager {
   scene: Scene;
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
+  state: GameState;
+
   fireUp: Input.Keyboard.Key;
   fireDown: Input.Keyboard.Key;
   fireLeft: Input.Keyboard.Key;
@@ -20,12 +23,18 @@ class InputManager {
   downLeft = false;
   downRight = false;
 
-  constructor(scene: Scene) {
+  constructor(scene: Scene, state: GameState) {
     this.scene = scene;
+    this.state = state;
     this.cursors = scene.input.keyboard?.createCursorKeys();
-    scene.input.keyboard?.on("keydown-ENTER", () =>
-      window.postMessage("toggle-pause"),
-    );
+    const togglePause = () => {
+      this.state.paused = !this.state.paused;
+    };
+    MessageService.listenForPause(togglePause);
+    scene.input.keyboard?.on("keydown-ENTER", () => {
+      MessageService.pause();
+      togglePause();
+    });
     this.fireUp = this.scene.input.keyboard?.addKey(
       Input.Keyboard.KeyCodes.W,
     ) as Input.Keyboard.Key;
@@ -62,13 +71,13 @@ class InputManager {
     }
 
     if (Input.Keyboard.JustDown(this.fireUp)) {
-      MessageService.sendWithAmount({ type: "player1-fire-up", amount: 1 });
+      MessageService.fire("player1-fire-up", 1);
     } else if (Input.Keyboard.JustDown(this.fireDown)) {
-      MessageService.sendWithAmount({ type: "player1-fire-down", amount: 1 });
+      MessageService.fire("player1-fire-down", 1);
     } else if (Input.Keyboard.JustDown(this.fireLeft)) {
-      MessageService.sendWithAmount({ type: "player1-fire-left", amount: 1 });
+      MessageService.fire("player1-fire-left", 1);
     } else if (Input.Keyboard.JustDown(this.fireRight)) {
-      MessageService.sendWithAmount({ type: "player1-fire-right", amount: 1 });
+      MessageService.fire("player1-fire-right", 1);
     }
   }
 }

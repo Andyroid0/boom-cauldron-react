@@ -1,11 +1,10 @@
 import Dungeon, { Room } from "@mikewesthad/dungeon";
 import { Cameras, GameObjects, Scene, Tilemaps, Types } from "phaser";
 import * as dat from "dat.gui";
-import EasyStar from "easystarjs";
 
 import PlayerManager from "../../managers/PlayerManager";
 import useStateStore from "../../context/useStateStore";
-import InputState from "../../types/InputState.class";
+import GameState from "../../types/GameState.class";
 import MessageService from "../../services/MessageService";
 import InputManager from "../../managers/InputManager";
 import EnemyManager from "../../managers/EnemyManager";
@@ -21,21 +20,14 @@ class DungeonScene extends Scene {
   cursors: Types.Input.Keyboard.CursorKeys | undefined;
   cam: Cameras.Scene2D.Camera | null = null;
   layer!: Tilemaps.TilemapLayer;
-  layer2: Tilemaps.TilemapLayer | null = null;
-  lastMoveTime = 0;
-  enemyLastMoveTime = 0;
-  easystar: EasyStar.js = new EasyStar.js();
-  paused: boolean = useStateStore.getState().paused;
   enemyManager: EnemyManager | undefined;
   playerManager: PlayerManager | undefined;
-  messageService!: MessageService;
-  state: InputState = new InputState();
+  state: GameState = new GameState();
   inputManager!: InputManager;
   mapManager: MapManager | undefined;
 
   constructor() {
     super("dungeon");
-    this.messageService = new MessageService(this.state);
   }
 
   preload() {
@@ -46,7 +38,7 @@ class DungeonScene extends Scene {
   }
 
   create() {
-    this.inputManager = new InputManager(this);
+    this.inputManager = new InputManager(this, this.state);
     //  40,000 tile test
     this.dungeon = new Dungeon({
       width: 60,

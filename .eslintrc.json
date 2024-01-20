@@ -24,6 +24,7 @@
     "@typescript-eslint/no-extraneous-class": "off",
     "@shopify/strict-component-boundaries": "off",
     "@typescript-eslint/naming-convention": "warn",
-    "no-warning-comments": "off"
+    "no-warning-comments": "off",
+    "no-nested-ternary": "off"
   }
 }

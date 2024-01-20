@@ -1,4 +1,4 @@
-type MessageServiceType =
+type MessageServiceTypeParam =
   | "toggle-pause"
   | "toggle-left"
   | "toggle-right"
@@ -17,4 +17,4 @@ type MessageServiceType =
   | "player-death"
   | "navigate-screen";
 
-export default MessageServiceType;
+export default MessageServiceTypeParam;

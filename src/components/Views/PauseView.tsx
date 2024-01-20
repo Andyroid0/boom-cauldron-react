@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Button, Dialog, DialogTitle, DialogContent } from "@mui/material";
 import { useShallow } from "zustand/react/shallow";
 
+import MessageService from "../../services/MessageService";
 import useStateStore from "../../context/useStateStore";
 
 interface PauseViewProps {}
@@ -9,7 +10,6 @@ interface PauseViewProps {}
 const PauseView: FC<PauseViewProps> = (props) => {
   // eslint-disable-next-line no-empty-pattern
   const {} = props;
-
   const { paused } = useStateStore(
     useShallow((state) => ({
       paused: state.paused,
@@ -17,7 +17,7 @@ const PauseView: FC<PauseViewProps> = (props) => {
   );
 
   const handleClose = () => {
-    window.postMessage("toggle-pause");
+    MessageService.pause();
   };
 
   const _title = "Pause Menu";

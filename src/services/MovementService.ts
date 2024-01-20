@@ -47,21 +47,6 @@ class MovementService {
     }
   };
 
-  // public static inputToState(
-  //   up: boolean,
-  //   down: boolean,
-  //   left: boolean,
-  //   right: boolean,
-  // ): MoveState {
-  //   const isLeft = left && !right && !up && !down;
-  //   const isRight = !left && right && !up && !down;
-  //   const isUp =  !left && !right && up && !down;
-  //   const isDown = !left && !right && !up && down;
-  //   if (isLeft) {
-  //     return "left";
-  //   } else if ()
-  // }
-
   public static pathFindingCompass(
     targetX: number,
     targetY: number,

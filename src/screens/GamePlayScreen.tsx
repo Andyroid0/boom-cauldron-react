@@ -8,7 +8,6 @@ import TopBar from "../components/HUD/TopBar";
 import BottomBar from "../components/HUD/BottomBar";
 import LoadingView from "../components/Views/LoadingView";
 import PauseView from "../components/Views/PauseView";
-import useMessageService from "../hooks/useMessageService";
 import useNavService from "../hooks/useNavService";
 import Bootstrap from "../scenes/Bootstrap";
 import Game from "../scenes/Game";
@@ -39,7 +38,6 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 const GamePlayScreen = () => {
-  useMessageService();
   useNavService();
   useEffect(() => {
     if (!document.getElementById("phaser-container")?.children.length) {

@@ -3,9 +3,9 @@ import { Math as PMath, Physics, Scene, Tilemaps, Types } from "phaser";
 import EntityID from "../types/EntityID.properties.class";
 import EntityStat from "../types/EntityStat.properties.class";
 import useStateStore from "../context/useStateStore";
-import MessageServiceWithAmount from "../types/MessageServiceWithAmount.interface";
 import EntityService from "../services/EntityService";
 import InputManager from "../managers/InputManager";
+import MessageService from "../services/MessageService";
 
 import Projectile from "./Projectile.entity";
 
@@ -52,44 +52,41 @@ class Player extends Physics.Matter.Sprite implements Player {
 
     scene.add.existing(this);
     useStateStore.getState().setPlayerHealth(this.health);
-    window.addEventListener(
-      "message",
-      (event: MessageEvent<MessageServiceWithAmount>) => {
-        const offset = 48;
-        if (event.data.type === "player1-fire-up") {
-          const dmg = 1;
-          this.attack(
-            dmg,
-            new PMath.Vector2({ x: 0, y: -3 }),
-            new PMath.Vector2({ x: 0, y: -offset }),
-          );
-        }
-        if (event.data.type === "player1-fire-down") {
-          const dmg = 1;
-          this.attack(
-            dmg,
-            new PMath.Vector2({ x: 0, y: 3 }),
-            new PMath.Vector2({ x: 0, y: offset }),
-          );
-        }
-        if (event.data.type === "player1-fire-left") {
-          const dmg = 1;
-          this.attack(
-            dmg,
-            new PMath.Vector2({ x: -3, y: 0 }),
-            new PMath.Vector2({ x: -offset, y: 0 }),
-          );
-        }
-        if (event.data.type === "player1-fire-right") {
-          const dmg = 1;
-          this.attack(
-            dmg,
-            new PMath.Vector2({ x: 3, y: 0 }),
-            new PMath.Vector2({ x: offset, y: 0 }),
-          );
-        }
-      },
-    );
+    MessageService.listenForPlayerFire((data) => {
+      const offset = 48;
+      if (data.type === "player1-fire-up") {
+        const dmg = 1;
+        this.attack(
+          dmg,
+          new PMath.Vector2({ x: 0, y: -3 }),
+          new PMath.Vector2({ x: 0, y: -offset }),
+        );
+      }
+      if (data.type === "player1-fire-down") {
+        const dmg = 1;
+        this.attack(
+          dmg,
+          new PMath.Vector2({ x: 0, y: 3 }),
+          new PMath.Vector2({ x: 0, y: offset }),
+        );
+      }
+      if (data.type === "player1-fire-left") {
+        const dmg = 1;
+        this.attack(
+          dmg,
+          new PMath.Vector2({ x: -3, y: 0 }),
+          new PMath.Vector2({ x: -offset, y: 0 }),
+        );
+      }
+      if (data.type === "player1-fire-right") {
+        const dmg = 1;
+        this.attack(
+          dmg,
+          new PMath.Vector2({ x: 3, y: 0 }),
+          new PMath.Vector2({ x: offset, y: 0 }),
+        );
+      }
+    });
   }
 
   public attack(dmg: number, dir: PMath.Vector2, offset: PMath.Vector2) {

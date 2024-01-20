@@ -4,6 +4,7 @@ import { Room } from "@mikewesthad/dungeon";
 import Player from "../entities/Player.entity.class";
 import PlayerDeps from "../types/PlayerDeps.dependencies.class";
 import MessageServiceWithIDAmount from "../types/MessageServiceWithIDAmount.interface";
+import MessageService from "../services/MessageService";
 
 import InputManager from "./InputManager";
 
@@ -39,8 +40,7 @@ class PlayerManager implements PlayerManager {
     player.x = this.map.tileToWorldX(room.x + coordX) as number;
     player.y = this.map.tileToWorldY(room.y + coordY) as number;
 
-    window.addEventListener(
-      "message",
+    MessageService.listenForEnemyAttacks(
       (event: MessageEvent<MessageServiceWithIDAmount>) => {
         if (event.data.type === "enemy-attack") {
           const playerIndex = this.pool.findIndex(
@@ -54,6 +54,7 @@ class PlayerManager implements PlayerManager {
         }
       },
     );
+
     return player;
   }
 

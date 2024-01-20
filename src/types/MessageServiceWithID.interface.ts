@@ -1,4 +1,4 @@
-import MessageServiceType from "./MessageServiceType.type";
+import MessageServiceType from "./MessageService/MessageServiceTypeParam.type";
 
 export default interface MessageServiceWithID {
   type: MessageServiceType;

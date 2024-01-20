@@ -14,5 +14,6 @@ body {
 
 @font-face {
   font-family: "Mana";
-  src: url("../../public/fonts/manaspc.ttf") format("truetype");
+  /*ignore error lines below vite fixes this*/
+  src: url("/fonts/manaspc.ttf") format("truetype");
 }

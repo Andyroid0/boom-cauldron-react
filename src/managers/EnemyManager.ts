@@ -6,8 +6,7 @@ import Player from "../entities/Player.entity.class";
 import EnemyDeps from "../types/EnemyDeps.dependencies.class";
 import Enemy from "../entities/Enemy.entity.class";
 import EnemyType from "../types/EnemyType.type";
-import MessageServiceWithOrigin from "../types/MessageServiceWithOriginIDAmount.interface";
-import MessageServiceWithID from "../types/MessageServiceWithID.interface";
+import MessageService from "../services/MessageService";
 
 interface EnemyManager extends EnemyDeps {}
 class EnemyManager implements EnemyManager {
@@ -48,24 +47,18 @@ class EnemyManager implements EnemyManager {
     this.easyStar.enableCornerCutting();
     this.easyStar.setAcceptableTiles([0]);
 
-    const handleProjectileEvent = (
-      event: MessageEvent<MessageServiceWithOrigin & MessageServiceWithID>,
-    ) => {
-      if (
-        event.data.type === "projectile-collision"
-        // event.data.origin === "player"
-      ) {
+    MessageService.listenForProjectileHitEnemy(
+      (event) => {
         const enemy = this.pool.find((enemy) => enemy.id === event.data.id);
         enemy?.takeDamage(event.data.amount);
-      } else if (event.data.type === "enemy-death") {
+      },
+      (event) => {
         const index = this.pool.findIndex(
           (enemy) => enemy.id === event.data.id,
         );
         this.pool.splice(index, 1);
-      }
-    };
-
-    window.addEventListener("message", handleProjectileEvent);
+      },
+    );
   }
 
   create(

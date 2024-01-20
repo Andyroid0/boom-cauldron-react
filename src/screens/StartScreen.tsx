@@ -2,17 +2,15 @@ import { Button, Typography } from "@mui/material";
 
 import useNavService from "../hooks/useNavService";
 import Background from "../components/Background";
+import MessageService from "../services/MessageService";
 
 const StartScreen = () => {
   const _start = "Start";
-  const goTo = useNavService();
+  useNavService();
 
-  const handleClick = () => {
-    goTo("/game");
-  };
   return (
     <Background>
-      <Button onClick={handleClick}>
+      <Button onClick={() => MessageService.navigateScreen("/game")}>
         <Typography
           variant="h3"
           sx={{

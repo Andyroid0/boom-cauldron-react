@@ -1,7 +1,7 @@
 import { Scene, Tilemaps, Types, Physics } from "phaser";
 
 import MessageService from "../services/MessageService";
-import MessageServiceOrigin from "../types/MessageServiceOrigin.type";
+import MessageServiceOrigin from "../types/MessageService/MessageServiceOriginType.type";
 
 import DurationDestroyer from "./DurationDestroyer";
 // import useStateStore from "../context/useStateStore";
@@ -59,12 +59,7 @@ class Projectile extends Physics.Matter.Sprite {
     context: Projectile,
   ) {
     if (data.bodyA.label !== "wall" && data.bodyA.label !== "item") {
-      MessageService.sendWithOriginIDAmount({
-        type: "projectile-collision",
-        origin,
-        id: data.bodyA.label,
-        amount,
-      });
+      MessageService.projectileHitEnemy(origin, data.bodyA.label, amount);
       // play projectile collision animation here.
       context.destroy();
     }
