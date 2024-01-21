@@ -1,33 +1,26 @@
-import { Math as PMath, Physics, Scene, Tilemaps, Types } from "phaser";
-
-import EntityID from "../types/EntityID.properties.class";
-import EntityStat from "../types/EntityStat.properties.class";
+import { Math as PMath, Physics, Tilemaps, Types } from "phaser";
 import useStateStore from "../context/useStateStore";
 import EntityService from "../services/EntityService";
 import InputManager from "../managers/InputManager";
 import MessageService from "../services/MessageService";
+import Projectile from "./Projectile.actor";
+import PlayerDependencies from "../types/PlayerDependencies.interface";
 
-import Projectile from "./Projectile.entity";
-
-interface Player extends EntityID, EntityStat {}
+interface Player {}
 class Player extends Physics.Matter.Sprite implements Player {
+  id: string | undefined;
   lastMoveTime = 0;
   health = 10;
+  multiplier = 1;
   map: Tilemaps.Tilemap | undefined;
   layer: Tilemaps.TilemapLayer | undefined;
   speed = 5;
   inputManager: InputManager;
 
-  constructor(
-    map: Tilemaps.Tilemap,
-    scene: Scene,
-    layer: Tilemaps.TilemapLayer,
-    world: Physics.Matter.World,
-    inputManager: InputManager,
-  ) {
+  constructor(deps: PlayerDependencies) {
     const label = EntityService.generateID();
 
-    super(world, 0, 0, "hero", 0);
+    super(deps.world, 0, 0, "hero", 0);
     const bodyOptions: Types.Physics.Matter.MatterBodyConfig = {
       label,
       shape: "circle",
@@ -44,13 +37,13 @@ class Player extends Physics.Matter.Sprite implements Player {
     this.setBody(setBodyConfig, bodyOptions);
     this.setFixedRotation();
     this.id = label;
-    this.map = map;
-    this.scene = scene;
-    this.layer = layer;
-    this.world = world;
-    this.inputManager = inputManager;
+    this.map = deps.map;
+    this.scene = deps.scene;
+    this.layer = deps.layer;
+    this.world = deps.world;
+    this.inputManager = deps.inputManager;
 
-    scene.add.existing(this);
+    deps.scene.add.existing(this);
     useStateStore.getState().setPlayerHealth(this.health);
     MessageService.listenForPlayerFire((data) => {
       if (data.type === "player1-fire-up") {

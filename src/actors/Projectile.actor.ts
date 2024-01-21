@@ -1,10 +1,7 @@
 import { Scene, Tilemaps, Types, Physics } from "phaser";
-
 import MessageService from "../services/MessageService";
 import MessageServiceOrigin from "../types/MessageService/MessageServiceOriginType.type";
-
-import DurationDestroyer from "./DurationDestroyer";
-// import useStateStore from "../context/useStateStore";
+import DurationDestroyer from "../systems/DurationDestroyer.system";
 
 class Projectile extends Physics.Matter.Sprite {
   startData: {

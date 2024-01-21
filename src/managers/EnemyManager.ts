@@ -2,9 +2,9 @@ import EasyStar from "easystarjs";
 import { Physics, Scene, Tilemaps } from "phaser";
 import { Room } from "@mikewesthad/dungeon";
 
-import Player from "../entities/Player.entity.class";
-import EnemyDeps from "../types/EnemyDeps.dependencies.class";
-import Enemy from "../entities/Enemy.entity.class";
+import Player from "../actors/Player.actor.class";
+import EnemyDeps from "../types/EnemyDependencies.interface";
+import Enemy from "../actors/Enemy.actor.class";
 import EnemyType from "../types/EnemyType.type";
 import MessageService from "../services/MessageService";
 
@@ -70,13 +70,11 @@ class EnemyManager implements EnemyManager {
   ) {
     if (!this.map) return;
     const enemy = new Enemy({
-      dependencies: {
-        map: this.map,
-        easyStar: this.easyStar,
-        player: this.player,
-        etype: type,
-        layer: this.layer,
-      },
+      map: this.map,
+      easyStar: this.easyStar,
+      player: this.player,
+      etype: type,
+      layer: this.layer,
       scene: this.scene,
       options: null,
       multiplier: 1,

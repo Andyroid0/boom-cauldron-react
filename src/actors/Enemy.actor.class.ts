@@ -1,18 +1,18 @@
-import { Math as PMath, Physics, Types } from "phaser";
+import { Math as PMath, Physics, Scene, Tilemaps, Types } from "phaser";
 import Color from "color";
-
-import EntityID from "../types/EntityID.properties.class";
-import EntityStat from "../types/EntityStat.properties.class";
-import EnemyInjectable from "../types/EnemyInj.injectables.interface";
-import EnemyDeps from "../types/EnemyDeps.dependencies.class";
+import EasyStar from "easystarjs";
+import EnemyDependencies from "../types/EnemyDependencies.interface";
 import EntityService from "../services/EntityService";
 import MessageService from "../services/MessageService";
 import MoveState from "../types/MoveState";
 import MovementService from "../services/MovementService";
 import CoolDownManager from "../managers/CoolDownManager";
+import EnemyType from "../types/EnemyType.type";
+import Player from "./Player.actor.class";
 
-interface Enemy extends EntityID, EntityStat, EnemyDeps {}
+interface Enemy {}
 class Enemy extends Physics.Matter.Sprite implements Enemy {
+  id: string | undefined;
   lastMoveTime = 0;
   lastAttackTime = 0;
   health = 0;
@@ -22,10 +22,18 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
   previousPlayerPosition: PMath.Vector2 | undefined;
   coolDownManager: CoolDownManager = new CoolDownManager(300);
   pathFindingOffset = 0;
+  player: Player | undefined;
+  map: Tilemaps.Tilemap | undefined;
+  easyStar: EasyStar.js | undefined;
+  etype: EnemyType | undefined;
+  layer: Tilemaps.TilemapLayer | undefined;
+  options: unknown;
+  multiplier = 1;
+  scene: Scene;
 
-  constructor(inj: EnemyInjectable) {
+  constructor(deps: EnemyDependencies) {
     const label = EntityService.generateID();
-    super(inj.world, 0, 0, "enemy", 0);
+    super(deps.world, 0, 0, "enemy", 0);
     const bodyOptions: Types.Physics.Matter.MatterBodyConfig = {
       label,
       shape: "circle",
@@ -48,15 +56,15 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     });
 
     this.id = label;
-    this.multiplier = inj.multiplier;
-    this.player = inj.dependencies.player;
-    this.map = inj.dependencies.map;
-    this.easyStar = inj.dependencies.easyStar;
-    this.scene = inj.scene;
-    this.layer = inj.dependencies.layer;
-    this.health = inj.health;
+    this.multiplier = deps.multiplier;
+    this.player = deps.player;
+    this.map = deps.map;
+    this.easyStar = deps.easyStar;
+    this.scene = deps.scene;
+    this.layer = deps.layer;
+    this.health = deps.health;
     this.scene.add.existing(this);
-    this.pathFindingOffset = inj.pathFindingOffset ?? 0;
+    this.pathFindingOffset = deps.pathFindingOffset ?? 0;
   }
 
   attack(dmg: number) {
@@ -78,6 +86,8 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     if (this.health <= 0) {
       this.handleDeath();
     }
+
+    if (!this.scene || !this.scene.tweens) return;
     if (this.scene.tweens.isTweening(this)) return;
 
     const originalTint = this.tint;
@@ -92,7 +102,7 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
       repeat: 1,
       yoyo: true,
     };
-    this.scene.tweens.add(tweenConfig);
+    this.scene.tweens?.add(tweenConfig);
     setTimeout(() => {
       this.setTintFill(originalTint);
       this.tintFill = false;

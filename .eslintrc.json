@@ -25,6 +25,7 @@
     "@shopify/strict-component-boundaries": "off",
     "@typescript-eslint/naming-convention": "warn",
     "no-warning-comments": "off",
-    "no-nested-ternary": "off"
+    "no-nested-ternary": "off",
+    "import/order": "off"
   }
 }
