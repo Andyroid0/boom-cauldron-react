@@ -50,8 +50,8 @@ export default class MessageService {
   };
 
   public static listenForPause = (callback: () => void) => {
-    const handleEvent = (event: MessageEvent<MessageServiceTypeParam>) => {
-      if (event.data === "toggle-pause") {
+    const handleEvent = (event: MessageEvent<MessageServiceType>) => {
+      if (event.data.type === "toggle-pause") {
         callback();
       }
     };

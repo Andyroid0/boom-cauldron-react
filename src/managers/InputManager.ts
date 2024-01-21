@@ -2,6 +2,7 @@ import { Input, Scene, Types } from "phaser";
 
 import MessageService from "../services/MessageService";
 import GameState from "../types/GameState.class";
+import useStateStore from "../context/useStateStore";
 
 class InputManager {
   scene: Scene;
@@ -33,7 +34,6 @@ class InputManager {
     MessageService.listenForPause(togglePause);
     scene.input.keyboard?.on("keydown-ENTER", () => {
       MessageService.pause();
-      togglePause();
     });
     this.fireUp = this.scene.input.keyboard?.addKey(
       Input.Keyboard.KeyCodes.W,
@@ -47,10 +47,34 @@ class InputManager {
     this.fireRight = this.scene.input.keyboard?.addKey(
       Input.Keyboard.KeyCodes.D,
     ) as Input.Keyboard.Key;
+
+    window.onblur = () => {
+      this.left = false;
+      this.right = false;
+      this.up = false;
+      this.down = false;
+
+      this.upLeft = false;
+      this.upRight = false;
+      this.downLeft = false;
+      this.downRight = false;
+      if (this.cursors) {
+        this.cursors.down.isDown = false;
+        this.cursors.up.isDown = false;
+        this.cursors.left.isDown = false;
+        this.cursors.right.isDown = false;
+      }
+
+      MessageService.pause();
+    };
   }
 
   update() {
     if (!this.cursors || !this.scene) return;
+    const stateStorePause = useStateStore.getState().paused;
+    if (stateStorePause !== this.state.paused) {
+      this.state.paused = stateStorePause;
+    }
     // interact with using the Message Service.
     if (this.cursors.left.isDown && !this.left) {
       this.left = true;
