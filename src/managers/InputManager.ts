@@ -64,8 +64,9 @@ class InputManager {
         this.cursors.left.isDown = false;
         this.cursors.right.isDown = false;
       }
-
-      MessageService.pause();
+      if (!this.state.paused) {
+        MessageService.pause();
+      }
     };
   }
 

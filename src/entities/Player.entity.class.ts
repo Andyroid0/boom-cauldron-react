@@ -53,7 +53,6 @@ class Player extends Physics.Matter.Sprite implements Player {
     scene.add.existing(this);
     useStateStore.getState().setPlayerHealth(this.health);
     MessageService.listenForPlayerFire((data) => {
-      const offset = 48;
       if (data.type === "player1-fire-up") {
         const dmg = 1;
         this.attack(

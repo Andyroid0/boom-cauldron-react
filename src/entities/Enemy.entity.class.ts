@@ -40,14 +40,13 @@ class Enemy extends Physics.Matter.Sprite implements Enemy {
     };
     this.setBody(setBodyConfig, bodyOptions);
     this.setFixedRotation();
-    this.setOnCollideActive(
-      (data: Types.Physics.Matter.MatterCollisionData) => {
-        if (this.coolDownManager.state === "cool") {
-          this.handleCollide(data, this.damage);
-          this.coolDownManager.setAction();
-        }
-      },
-    );
+    this.setOnCollide((data: Types.Physics.Matter.MatterCollisionData) => {
+      if (this.coolDownManager.state === "cool") {
+        this.handleCollide(data, this.damage);
+        this.coolDownManager.setAction();
+      }
+    });
+
     this.id = label;
     this.multiplier = inj.multiplier;
     this.player = inj.dependencies.player;
