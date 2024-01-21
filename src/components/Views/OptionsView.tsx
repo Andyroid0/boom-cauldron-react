@@ -1,13 +1,16 @@
 import { FC } from "react";
 import * as React from "react";
-import { Button, Dialog, DialogTitle, DialogContent } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Typography,
+} from "@mui/material";
 import { useShallow } from "zustand/react/shallow";
 
-// import VolumeControl from "../UI/VolumeControl";
-
+import VolumeControl from "../UI/VolumeControl";
 import useStateStore from "../../context/useStateStore";
-
-// const [value, setValue] = React.useState<number>(30);
 
 interface OptionsViewProps {}
 
@@ -42,6 +45,14 @@ const OptionsView: FC<OptionsViewProps> = (props) => {
     >
       <DialogTitle>{_title}</DialogTitle>
       <DialogContent>
+        <Typography variant="h6">{_volume}</Typography>
+        <VolumeControl />
+        <Typography variant="h6">{_sfx}</Typography>
+        <VolumeControl />
+        <Typography variant="h6">{_brightness}</Typography>
+        <VolumeControl />
+        <Typography variant="h6"> {_music} </Typography>
+        <VolumeControl />
         <Button onClick={handleClose}>{_closeButton}</Button>
       </DialogContent>
     </Dialog>

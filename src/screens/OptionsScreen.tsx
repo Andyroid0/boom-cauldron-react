@@ -2,6 +2,7 @@ import { Button, Typography } from "@mui/material";
 
 import useNavService from "../hooks/useNavService";
 import Background from "../components/Background";
+// import volumeControl from "../../src/components/UI/VolumeControl";
 
 const OptionsScreen = () => {
   const _options = "Options";
@@ -12,6 +13,7 @@ const OptionsScreen = () => {
   };
   return (
     <Background>
+      {/* <volumeControl /> */}
       <Button onClick={handleClick}>
         <Typography
           variant="h3"
